@@ -10,7 +10,9 @@ Build a Flutter mobile app for Scholera, an AI-native LMS, with Supabase auth/da
 
 - This is the submission repository.
 - `assessment-rubrics.md` was copied here from the assessment repository as local context.
-- The Flutter app has not been scaffolded yet.
+- The Flutter app has been scaffolded for iOS and Android.
+- A basic Riverpod, GoRouter, Material 3, MVC-style app shell exists.
+- Supabase schema/config planning exists in `supabase/schema.sql`, `supabase/README.md`, `.env.example`, and `lib/app/env.dart`.
 - Planning docs exist and should be treated as current project memory.
 
 ## Required Reading For Future Conversations
@@ -62,17 +64,16 @@ Riverpod should expose repositories and controllers. Views should not directly q
 
 ## Build Priority
 
-1. Scaffold Flutter app.
-2. Add dependencies.
-3. Initialize Supabase.
-4. Build auth and role-based routing.
-5. Build shared UI states.
-6. Build admin read flow.
-7. Build professor course/module/announcement/roadmap write flow.
-8. Build student course/module/announcement/roadmap progress flow.
-9. Add profile editing.
-10. Add deep links.
-11. Polish states and README.
+1. Create/configure Supabase project using `supabase/schema.sql`.
+2. Initialize Supabase in Flutter using `AppEnv`.
+3. Build auth and role-based routing.
+4. Build shared UI states.
+5. Build admin read flow.
+6. Build professor course/module/announcement/roadmap write flow.
+7. Build student course/module/announcement/roadmap progress flow.
+8. Add profile editing.
+9. Add deep links.
+10. Polish states and README.
 
 ## Important Assignment Constraints
 

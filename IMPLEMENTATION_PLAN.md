@@ -40,6 +40,8 @@ The app should always have a demoable vertical path for all three roles:
 - Set up `.env` loading or compile-time defines for Supabase URL and anon key.
 - Add initial README sections early so setup stays documented as the app grows.
 
+Current decision: read Supabase config through Dart defines in `lib/app/env.dart`; keep `.env` as a private local reference file only.
+
 ## Phase 1: App Architecture
 
 Target folder layout:
@@ -122,6 +124,8 @@ MVC mapping:
 
 ## Phase 2: Supabase Foundation
 
+- Apply `supabase/schema.sql` to the Supabase project.
+- Create `avatars` and `course-content` storage buckets.
 - Initialize Supabase in `main.dart`.
 - Add `AuthRepository`.
 - Add `ProfileRepository`.

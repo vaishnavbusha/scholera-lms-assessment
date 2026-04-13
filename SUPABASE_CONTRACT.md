@@ -15,6 +15,20 @@ SUPABASE_ANON_KEY=
 
 Do not commit secret keys. The anon key is acceptable for client use when Row Level Security is configured correctly, but keep environment files out of public commits unless intentionally using sample values.
 
+Current app config foundation:
+
+- `.env.example` documents the required values.
+- `.env` is ignored for private local use.
+- `lib/app/env.dart` reads config through Dart defines:
+
+```sh
+flutter run \
+  --dart-define=SUPABASE_URL=https://your-project-ref.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=your-public-anon-key
+```
+
+The app does not read `.env` directly yet.
+
 ## Auth
 
 Supabase Auth handles email/password login.
@@ -24,6 +38,8 @@ The authenticated user's app role is expected to be stored in a profile table, n
 ## Expected Tables
 
 These names are assumptions until confirmed against the real Supabase schema.
+
+A draft implementation plan exists in `supabase/schema.sql`. Treat it as the local contract until the Supabase project is created and verified.
 
 ### profiles
 
@@ -164,6 +180,8 @@ Expected buckets:
 | avatars | Profile images |
 | course-content | Professor uploaded PDF/PPT files |
 
+These buckets must be created in Supabase Storage separately from `schema.sql`.
+
 ## Repository Responsibilities
 
 | Repository | Responsibilities |
@@ -192,6 +210,9 @@ These are behavior expectations from the assignment:
 
 When Supabase access is available:
 
+- [x] Draft local schema plan.
+- [x] Add local app config keys.
+- [ ] Apply `supabase/schema.sql` to Supabase.
 - [ ] Confirm table names.
 - [ ] Confirm profile role column.
 - [ ] Confirm course/section relationship.
@@ -199,8 +220,8 @@ When Supabase access is available:
 - [ ] Confirm student enrollment relationship.
 - [ ] Confirm announcement columns.
 - [ ] Confirm module and module item columns.
-- [ ] Confirm file storage bucket and upload policy.
-- [ ] Confirm roadmap source: table, view, RPC, or generated client-side from modules/items.
+- [ ] Create and confirm file storage buckets and upload policies.
+- [ ] Confirm roadmap trigger creates nodes from module items.
 - [ ] Confirm extracted topics relationship.
 - [ ] Confirm student progress table and allowed statuses.
 - [ ] Confirm RLS behavior for all three roles.
@@ -215,4 +236,3 @@ When Supabase access is available:
 - Does the backend expose RPCs for admin counts, or should counts be queried directly?
 - Are avatar and course file uploads already configured in storage buckets?
 - Is there a required URL scheme or app bundle identifier for deep links?
-

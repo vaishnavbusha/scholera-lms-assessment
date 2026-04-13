@@ -3,10 +3,11 @@
 ## Current State
 
 - Assignment context has been read from `assessment-rubrics.md`.
-- This repository is the submission repository and currently contains the assignment brief, license, and planning docs.
-- Flutter app has not been scaffolded yet.
+- This repository is the submission repository and currently contains the assignment brief, planning docs, and Flutter scaffold.
+- Flutter app has been scaffolded for iOS and Android.
 - Planned stack: Flutter, Riverpod, Supabase, GoRouter.
 - Planned architecture: MVC-inspired features with Riverpod controllers and Supabase repositories.
+- Supabase schema plan and Dart define environment foundation have been added.
 
 ## Active Decisions
 
@@ -32,13 +33,25 @@
 
 ### Foundation
 
-- [ ] Scaffold Flutter app.
-- [ ] Add dependencies.
-- [ ] Configure environment variables.
+- [x] Scaffold Flutter app.
+- [x] Add dependencies.
+- [x] Configure environment variables.
 - [ ] Initialize Supabase.
-- [ ] Configure app theme.
-- [ ] Configure GoRouter.
+- [x] Configure app theme.
+- [x] Configure GoRouter.
 - [ ] Add shared loading, empty, and error widgets.
+
+### Supabase Backend
+
+- [x] Draft schema SQL.
+- [x] Document storage buckets.
+- [ ] Create Supabase project.
+- [ ] Apply schema SQL.
+- [ ] Create storage buckets.
+- [ ] Configure storage policies.
+- [ ] Create test users.
+- [ ] Seed required demo data.
+- [ ] Verify RLS with admin, professor, and student users.
 
 ### Auth
 
@@ -144,7 +157,7 @@
 
 ## Next Best Action
 
-Create the actual Flutter app in the final submission repository, then wire Supabase auth and role routing before building feature screens.
+Initialize Supabase in Flutter using `AppEnv`, then wire email/password auth, profile role lookup, and role-based route redirects.
 
 ## Commit Checkpoints
 

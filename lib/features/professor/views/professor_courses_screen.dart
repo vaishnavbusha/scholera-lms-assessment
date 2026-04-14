@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/scholera_scaffold.dart';
+import '../../auth/controllers/auth_controller.dart';
 
-class ProfessorCoursesScreen extends StatelessWidget {
+class ProfessorCoursesScreen extends ConsumerWidget {
   const ProfessorCoursesScreen({super.key});
 
   static const routeName = 'professor-courses';
   static const routePath = '/professor';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ScholeraScaffold(
       title: 'Professor',
+      actions: [
+        TextButton(
+          onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+          child: const Text('Sign out'),
+        ),
+      ],
       children: [
         Text(
           'My courses',

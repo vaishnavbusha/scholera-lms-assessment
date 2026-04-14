@@ -20,6 +20,8 @@ Current app config foundation:
 - `.env.example` documents the required values.
 - `.env` is ignored for private local use.
 - `lib/app/env.dart` reads config through Dart defines:
+- `lib/main.dart` initializes Supabase only when both values are present.
+- The login screen shows a setup-needed state when either value is missing.
 
 ```sh
 flutter run \
@@ -212,6 +214,7 @@ When Supabase access is available:
 
 - [x] Draft local schema plan.
 - [x] Add local app config keys.
+- [x] Add Supabase web setup checklist.
 - [ ] Apply `supabase/schema.sql` to Supabase.
 - [ ] Confirm table names.
 - [ ] Confirm profile role column.

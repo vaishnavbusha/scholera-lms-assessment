@@ -24,9 +24,13 @@ The Flutter app scaffold is in place with:
 - GoRouter route shell.
 - Riverpod `ProviderScope`.
 - MVC-inspired feature folders.
-- Placeholder role shells for admin, professor, and student.
+- Supabase initialization through Dart defines.
+- Auth/profile repositories and controller.
+- Real email/password login form.
+- Role redirects for admin, professor, and student profiles.
+- Setup-needed sign-in state when Supabase config is missing.
 
-Supabase auth and real data integration are the next implementation milestone.
+The Supabase dashboard project, storage buckets, test users, and seed data still need to be created before auth can be verified end to end.
 
 ## Setup
 
@@ -42,6 +46,8 @@ Copy `.env.example` to `.env` for local reference if useful. The app reads confi
 ## Supabase
 
 The draft schema lives in `supabase/schema.sql`. It includes the planned tables, enums, indexes, roadmap creation trigger, and draft RLS policies for the three role model.
+
+Use `supabase/WEB_SETUP.md` to configure the Supabase dashboard.
 
 Storage buckets still need to be created in Supabase:
 

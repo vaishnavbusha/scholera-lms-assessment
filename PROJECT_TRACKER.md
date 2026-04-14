@@ -8,6 +8,8 @@
 - Planned stack: Flutter, Riverpod, Supabase, GoRouter.
 - Planned architecture: MVC-inspired features with Riverpod controllers and Supabase repositories.
 - Supabase schema plan and Dart define environment foundation have been added.
+- Flutter-side Supabase initialization, auth repository, profile repository, auth controller, login form, role redirect, and sign-out hooks have been added.
+- Supabase dashboard setup is still pending, so auth is not end-to-end verified yet.
 
 ## Active Decisions
 
@@ -36,7 +38,7 @@
 - [x] Scaffold Flutter app.
 - [x] Add dependencies.
 - [x] Configure environment variables.
-- [ ] Initialize Supabase.
+- [x] Initialize Supabase.
 - [x] Configure app theme.
 - [x] Configure GoRouter.
 - [ ] Add shared loading, empty, and error widgets.
@@ -45,6 +47,7 @@
 
 - [x] Draft schema SQL.
 - [x] Document storage buckets.
+- [x] Document Supabase web setup checklist.
 - [ ] Create Supabase project.
 - [ ] Apply schema SQL.
 - [ ] Create storage buckets.
@@ -55,12 +58,12 @@
 
 ### Auth
 
-- [ ] Email/password sign-in.
-- [ ] Session restore.
-- [ ] Profile role fetch.
-- [ ] Role-based route redirect.
+- [ ] Email/password sign-in. App-side code exists; needs Supabase project verification.
+- [ ] Session restore. App-side code exists; needs Supabase project verification.
+- [ ] Profile role fetch. App-side code exists; needs Supabase project verification.
+- [ ] Role-based route redirect. App-side code exists; needs Supabase project verification.
 - [ ] Expired session handling.
-- [ ] Sign-out from each role.
+- [ ] Sign-out from each role. App-side hooks exist; needs Supabase project verification.
 
 ### Admin
 
@@ -157,7 +160,7 @@
 
 ## Next Best Action
 
-Initialize Supabase in Flutter using `AppEnv`, then wire email/password auth, profile role lookup, and role-based route redirects.
+Create the Supabase dashboard project, apply `supabase/schema.sql`, create buckets and test users, then verify email/password auth, profile role lookup, role routing, and sign-out end to end.
 
 ## Commit Checkpoints
 

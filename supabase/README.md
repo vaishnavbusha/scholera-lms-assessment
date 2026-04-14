@@ -7,6 +7,7 @@ This folder contains the planned database contract for the Scholera mobile proto
 | File | Purpose |
 | --- | --- |
 | `schema.sql` | Tables, enums, helper functions, roadmap trigger, indexes, and draft RLS policies |
+| `WEB_SETUP.md` | Dashboard checklist for creating the Supabase project, buckets, users, and seed data |
 
 ## Setup Order
 
@@ -38,3 +39,5 @@ Copy `.env.example` to `.env` for local reference if useful, but do not commit r
 ## Verification
 
 Before wiring feature repositories, confirm this schema against the actual Supabase project and update `SUPABASE_CONTRACT.md` if anything differs.
+
+Use `WEB_SETUP.md` as the practical checklist while configuring the dashboard.

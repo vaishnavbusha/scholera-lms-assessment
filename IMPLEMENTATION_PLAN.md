@@ -126,11 +126,11 @@ MVC mapping:
 
 - Apply `supabase/schema.sql` to the Supabase project.
 - Create `avatars` and `course-content` storage buckets.
-- Initialize Supabase in `main.dart`.
-- Add `AuthRepository`.
-- Add `ProfileRepository`.
-- Add `SessionController` or equivalent Riverpod notifier.
-- Implement sign-in, sign-out, session restore, and profile role fetch.
+- Initialize Supabase in `main.dart`. Done app-side.
+- Add `AuthRepository`. Done app-side.
+- Add `ProfileRepository`. Done app-side.
+- Add `SessionController` or equivalent Riverpod notifier. Done app-side as `AuthController`.
+- Implement sign-in, sign-out, session restore, and profile role fetch. App-side code exists; Supabase dashboard verification is still required.
 - Define typed role enum:
   - `admin`
   - `professor`

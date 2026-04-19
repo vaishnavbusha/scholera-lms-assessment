@@ -13,6 +13,7 @@
 - Plan tweaks (2026-04-19): dropped `freezed` / `json_serializable` / `build_runner` / `flutter_secure_storage` from the dependency plan; added `app_links` for deep linking; scoped the create-item UI to `link` / `note` / `file` only; added explicit `storage.objects` policies to `schema.sql`; enriched `seed.template.sql` to 2 departments, 3 courses, multi-module content; committed to carrying demo credentials in README.
 - Auth verified end-to-end (2026-04-19): all three roles sign in on the Android emulator and land on the correct role shell. VS Code launch configs are in `.vscode/launch.json` using `--dart-define-from-file=.env`.
 - Phase 3 shared UI system complete (2026-04-19): "studio light" design thesis — single-family **Plus Jakarta Sans** typography, cool neutral canvas (#F6F7F9), saturated role accents (admin cobalt #1D4ED8, professor amber #D97706, student emerald #059669), slate-family ink. Tokens, role theme, and eight reusable primitives (`ScholeraScaffold`, `AsyncContent`, `EmptyState`, `ErrorState`, `LoadingSkeleton`, `StatusPill`, `TopicChip`, `RoleBadge`) live under `lib/app/theme/` and `lib/core/widgets/`. Each role shell wraps itself in `RoleThemeScope` — primitives take no role parameter. Earlier "academic workshop" palette (warm cream + Fraunces serif) was discarded because the cream canvas felt derivative.
+- Phase 4 admin experience complete (2026-04-19): stats dashboard + departments list merged on `AdminHomeScreen`, `DepartmentDetailScreen` and `ProfessorDetailScreen` as drill-downs. `AdminRepository` + Riverpod `FutureProvider` family handle the four queries. Pull-to-refresh on every admin screen. All data live from Supabase — no fixtures.
 
 ## Active Decisions
 
@@ -77,10 +78,11 @@
 
 ### Admin
 
-- [ ] Dashboard stats.
-- [ ] Departments list.
-- [ ] Department detail.
-- [ ] Professor detail.
+- [x] Dashboard stats (students / professors / courses / departments counts).
+- [x] Departments list (merged into the admin home; tapping opens detail).
+- [x] Department detail (name, description, assigned professors).
+- [x] Professor detail (profile + course sections with joined course info).
+- [x] Pull-to-refresh on admin home and detail screens.
 
 ### Professor
 
@@ -175,7 +177,7 @@
 
 ## Next Best Action
 
-Phase 3 shared UI is live. Next is Phase 4: the admin experience — dashboard stats, departments list, department detail, professor detail. Use `AsyncContent` + `EmptyState` + `LoadingSkeleton` on every list, and `RoleBadge` + `ScholeraScaffold.list` on every screen. All admin data comes from Supabase (no fixtures).
+Phase 4 admin experience is live. Next is Phase 5: the professor experience — `ProfessorCoursesScreen` (list sections the professor teaches), `ProfessorCourseScreen` with tabs (Announcements, Modules, Roadmap), create-announcement sheet, create-module sheet, add-module-item sheet (link / note / file upload). Then Phase 5b: the professor roadmap view with topics and coverage status toggle.
 
 ## Commit Checkpoints
 

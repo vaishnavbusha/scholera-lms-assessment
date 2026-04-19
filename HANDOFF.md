@@ -15,6 +15,7 @@ Build a Flutter mobile app for Scholera, an AI-native LMS, with Supabase auth/da
 - Supabase project is live: schema, storage policies, buckets (`avatars` public, `course-content` private), three auth users (admin / professor / student), and the enriched demo seed are applied.
 - **Auth is verified end-to-end.** All three roles sign in and land in the correct role shell on the Android emulator.
 - **Phase 3 shared UI system is complete.** "Studio light" design: single-family Plus Jakarta Sans typography, cool neutral canvas, saturated role accents (admin cobalt, professor amber, student emerald). Tokens, `RoleThemeScope`, and eight reusable primitives live under `lib/app/theme/` and `lib/core/widgets/`.
+- **Phase 4 admin experience is complete.** Dashboard stats (students/professors/courses/departments) + departments list on the admin home, `DepartmentDetailScreen` and `ProfessorDetailScreen` as drill-downs, all behind `AdminRepository` + Riverpod `FutureProvider` family. Pull-to-refresh on every admin screen.
 - Planning docs are kept current — treat `PROJECT_TRACKER.md` as the canonical status board.
 
 ## Launch
@@ -78,7 +79,7 @@ Steps 1–4 are **done**. Next active step is 5.
 2. ~~Create buckets, test users, and seed data.~~
 3. ~~Verify auth and role-based routing end to end.~~
 4. ~~Build shared UI states (tokens, role theme, primitives).~~
-5. Build admin read flow (dashboard stats, departments, department detail, professor detail).
+5. ~~Build admin read flow (dashboard stats, departments, department detail, professor detail).~~
 6. Build professor course/module/announcement/roadmap write flow.
 7. Build student course/module/announcement/roadmap progress flow.
 8. Add profile editing.

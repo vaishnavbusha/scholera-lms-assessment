@@ -1,19 +1,37 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/admin/views/admin_home_screen.dart';
+import '../features/admin/views/department_detail_screen.dart';
+import '../features/admin/views/professor_detail_screen.dart';
 import '../features/auth/controllers/auth_controller.dart';
 import '../features/auth/views/login_screen.dart';
 import '../features/auth/models/app_role.dart';
 import '../features/professor/views/professor_courses_screen.dart';
 import '../features/student/views/student_courses_screen.dart';
 
+/// The app's [GoRouter]. Created once per app lifetime.
+///
+/// It would be tempting to `ref.watch` the auth controller inside this
+/// provider and derive the redirect from the watched state. Don't — every
+/// auth transition (idle → loading → data) would recreate the router, which
+/// tears down and rebuilds the whole navigator. Screens would lose their
+/// state (the login screen would remount, losing typed text mid-sign-in).
+///
+/// Instead, hold a [ChangeNotifier] that re-fires on every auth change, pass
+/// it as `refreshListenable`, and `ref.read` the current auth snapshot
+/// inside the `redirect` callback. GoRouter re-evaluates redirects without
+/// rebuilding the navigator.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
+  final authListenable = _AuthChangeNotifier(ref);
+  ref.onDispose(authListenable.dispose);
 
   return GoRouter(
     initialLocation: LoginScreen.routePath,
+    refreshListenable: authListenable,
     redirect: (context, state) {
+      final authState = ref.read(authControllerProvider);
       final sessionState = authState.value;
       final isLoggingIn = state.matchedLocation == LoginScreen.routePath;
 
@@ -45,6 +63,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AdminHomeScreen.routePath,
         name: AdminHomeScreen.routeName,
         builder: (context, state) => const AdminHomeScreen(),
+        routes: [
+          GoRoute(
+            path: 'departments/:id',
+            name: DepartmentDetailScreen.routeName,
+            builder: (context, state) => DepartmentDetailScreen(
+              departmentId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: 'professors/:id',
+            name: ProfessorDetailScreen.routeName,
+            builder: (context, state) => ProfessorDetailScreen(
+              professorId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: ProfessorCoursesScreen.routePath,
@@ -66,4 +100,25 @@ String _homePathForRole(AppRole role) {
     AppRole.professor => ProfessorCoursesScreen.routePath,
     AppRole.student => StudentCoursesScreen.routePath,
   };
+}
+
+/// Bridges [authControllerProvider] into a [Listenable] so GoRouter can
+/// re-run its redirect when auth state changes — without recreating the
+/// router itself.
+class _AuthChangeNotifier extends ChangeNotifier {
+  _AuthChangeNotifier(Ref ref) {
+    _subscription = ref.listen<Object?>(
+      authControllerProvider,
+      (_, __) => notifyListeners(),
+      fireImmediately: false,
+    );
+  }
+
+  late final ProviderSubscription<Object?> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.close();
+    super.dispose();
+  }
 }

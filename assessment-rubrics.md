@@ -1,7 +1,5 @@
 # Take-Home Assignment: Mobile Application Developer
 
-> **Note:** This repository is for reading the assignment only. Do not push your code here. Create a brand new repository of your own and share that link with us.
-
 ---
 
 ## Context

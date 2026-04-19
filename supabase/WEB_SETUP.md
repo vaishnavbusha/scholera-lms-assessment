@@ -36,16 +36,36 @@ Do not commit real keys to the repository.
    - `topics`
    - `student_progress`
 
-## 3. Create Storage Buckets
+## 3. Create Storage Buckets And Apply Policies
+
+### 3a. Create buckets
 
 Create these buckets in Supabase Storage:
 
-| Bucket | Purpose |
-| --- | --- |
-| `avatars` | Profile images |
-| `course-content` | Professor-uploaded PDF/PPT course files |
+| Bucket | Visibility | Purpose |
+| --- | --- | --- |
+| `avatars` | Public | Profile images |
+| `course-content` | Private | Professor-uploaded PDF/PPT course files |
 
-Storage policies still need to be verified before file upload work begins.
+### 3b. Path conventions the policies rely on
+
+The app writes uploaded files to paths prefixed by the owning entity:
+
+- `avatars/{user_id}/...`
+- `course-content/{section_id}/...`
+
+The `storage.objects` policies in `schema.sql` parse the first folder from the object path and gate access by that id. Uploads that do not follow the convention will be rejected.
+
+### 3c. Apply storage policies
+
+The policies at the bottom of `schema.sql` reference the bucket ids `avatars` and `course-content`. Make sure the buckets exist first, then re-run the storage policy block (or the full script) so the policies bind against real buckets.
+
+Sanity checks after applying:
+
+- Anonymous read of an `avatars` object returns the file.
+- A signed-in student cannot upload into `avatars/{another_user_id}/...`.
+- A signed-in professor can upload into `course-content/{their_section_id}/...` but not into another professor's section.
+- A signed-in student enrolled in a section can read files under `course-content/{that_section_id}/...`.
 
 ## 4. Create Test Users
 
@@ -57,7 +77,9 @@ Create one user for each role:
 | Professor | Course management, announcements, modules, roadmap coverage |
 | Student | Enrolled courses, read-only content, personal progress |
 
-After each auth user is created, update the matching row in `profiles.role`.
+After each auth user is created, the trigger from `schema.sql` creates a matching row in `public.profiles`.
+
+You do not need to update `profiles.role` manually if you run `seed.template.sql` afterward, because the seed script updates the role and profile fields for the three user ids you provide.
 
 Expected values:
 
@@ -69,19 +91,29 @@ student
 
 ## 5. Seed Demo Data
 
-Create enough data to support the assignment demo:
+1. Open `supabase/seed.template.sql`.
+2. Replace the three placeholder UUIDs with the real auth user ids.
+3. Run the script in the SQL editor.
 
-- At least one department.
-- At least one professor profile assigned to that department.
-- At least one student profile.
-- At least one course.
-- At least one course section taught by the professor.
-- At least one enrollment connecting the student to the section.
-- At least one announcement.
-- At least two modules.
-- At least one link item, note item, and file item.
-- Topics for module items.
-- Student progress rows for at least part of the roadmap.
+Important:
+
+- The script inserts the department before assigning `department_id` on professor/student profiles.
+- If you ran an older copy of the seed file, use the updated version from the repo and rerun it.
+
+The template creates:
+
+- one department
+- one program
+- one course
+- one course section
+- one admin, one professor, and one student profile mapping
+- one enrollment
+- one announcement
+- two modules
+- one link item, one note item, and one file item
+- roadmap statuses
+- extracted topics
+- student progress
 
 ## 6. Verify Role Access
 
@@ -93,7 +125,13 @@ Before building the full feature screens, test these assumptions:
 - Student can update only their own progress.
 - All roles can read and edit their own profile.
 
-## 7. Current App Behavior
+## 7. Demo Credentials
+
+Because this is a take-home submission, the reviewer needs to sign in as each role. Once the three test users are created and seeded, record their emails and passwords in the repository `README.md` under a "Demo Credentials" section so the reviewer can sign in in under 5 minutes.
+
+These credentials exist only in the throwaway demo Supabase project. Do not reuse passwords from any real account.
+
+## 8. Current App Behavior
 
 If `SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing, the app shows a setup-needed message on the sign-in screen and disables sign-in.
 

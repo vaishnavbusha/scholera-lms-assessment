@@ -8,21 +8,19 @@ This folder contains the planned database contract for the Scholera mobile proto
 | --- | --- |
 | `schema.sql` | Tables, enums, helper functions, roadmap trigger, indexes, and draft RLS policies |
 | `WEB_SETUP.md` | Dashboard checklist for creating the Supabase project, buckets, users, and seed data |
+| `seed.template.sql` | Demo data template for one admin, one professor, one student, one course section, modules, topics, and progress |
 
 ## Setup Order
 
 1. Create a Supabase project.
 2. Open the SQL editor.
 3. Run `schema.sql`.
-4. Create storage buckets:
+4. Create auth users for admin, professor, and student.
+5. Replace the placeholder UUIDs in `seed.template.sql`.
+6. Run `seed.template.sql`.
+7. Create storage buckets:
    - `avatars`
    - `course-content`
-5. Create one test auth user for each role:
-   - admin
-   - professor
-   - student
-6. Update the generated `profiles.role` values.
-7. Insert seed departments, courses, sections, enrollments, modules, module items, roadmap statuses, topics, and student progress.
 
 ## App Environment
 

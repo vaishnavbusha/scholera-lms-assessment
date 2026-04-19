@@ -182,7 +182,16 @@ Expected buckets:
 | avatars | Profile images |
 | course-content | Professor uploaded PDF/PPT files |
 
-These buckets must be created in Supabase Storage separately from `schema.sql`.
+These buckets must be created in Supabase Storage separately from `schema.sql`. The bucket rows themselves are created via the dashboard; the access policies live on `storage.objects` and are applied by `schema.sql` once the buckets exist.
+
+### Storage Policies
+
+| Bucket | Read | Write | Notes |
+| --- | --- | --- | --- |
+| avatars | Public | Authenticated user may insert/update/delete rows under a path prefixed with their own `auth.uid()` | Public read matches the "avatar on profile card" use case. Path convention: `avatars/{user_id}/...` |
+| course-content | Admin, section professor, and enrolled students in that section | Section professor only | The bucket is private. Path convention: `course-content/{section_id}/...` so RLS can gate by `section_id` using `teaches_section` / `enrolled_in_section` helpers. |
+
+The `storage.objects` policies must be able to infer `section_id` from the object path. The app is responsible for writing uploads to a path that begins with the owning `section_id`.
 
 ## Repository Responsibilities
 

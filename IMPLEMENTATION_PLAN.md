@@ -24,19 +24,16 @@ The app should always have a demoable vertical path for all three roles:
   - `flutter_riverpod`
   - `supabase_flutter`
   - `go_router`
-  - `freezed_annotation`
-  - `json_annotation`
   - `file_picker`
   - `cached_network_image`
   - `intl`
   - `url_launcher`
-  - `flutter_secure_storage` if needed beyond Supabase defaults
+  - `app_links` — receive `scholera://` deep links on iOS and Android
   - `shimmer` or a small custom skeleton implementation
 - Add dev packages:
-  - `build_runner`
-  - `freezed`
-  - `json_serializable`
   - `flutter_lints`
+
+Codegen decision: models are hand-written Dart classes with manual `fromJson` / `toJson`. `freezed`, `json_serializable`, and `build_runner` were evaluated and skipped — the data surface is small enough that codegen overhead is not justified.
 - Set up `.env` loading or compile-time defines for Supabase URL and anon key.
 - Add initial README sections early so setup stays documented as the app grows.
 
@@ -223,6 +220,7 @@ Implementation notes:
 - Module management is the most important professor feature.
 - Use optimistic UI for simple creates and status changes when safe.
 - Make item type visually obvious through label and icon.
+- Surface only `link`, `note`, and `file` in the create-item UI. The `lecture` and `video` enum values stay in the schema but are not exposed as create options in this prototype.
 
 Definition of done:
 
@@ -273,10 +271,13 @@ Profile:
 
 Deep linking:
 
-- Configure URL scheme `scholera://`.
-- Add route for course announcement detail.
-- Preserve intended route through login.
-- Validate authorization after route opens.
+- Use the `app_links` package to receive initial and runtime deep links.
+- Register the URL scheme on each platform:
+  - iOS: add `CFBundleURLTypes` entry with `CFBundleURLSchemes = ["scholera"]` in `ios/Runner/Info.plist`.
+  - Android: add an `intent-filter` with `android:scheme="scholera"` in `android/app/src/main/AndroidManifest.xml`.
+- Add a GoRouter route for `courses/:courseId/announcements/:announcementId`.
+- Forward incoming links into GoRouter; if unauthenticated, stash the intended path and replay it after login succeeds.
+- Validate the user actually has access to the target announcement after routing (teaches the section, enrolled in the section, or admin) and fall back to a friendly not-found state if not.
 
 Definition of done:
 

@@ -10,6 +10,7 @@
 - Supabase schema plan and Dart define environment foundation have been added.
 - Flutter-side Supabase initialization, auth repository, profile repository, auth controller, login form, role redirect, and sign-out hooks have been added.
 - Supabase dashboard setup is still pending, so auth is not end-to-end verified yet.
+- Plan tweaks (2026-04-19): dropped `freezed` / `json_serializable` / `build_runner` / `flutter_secure_storage` from the dependency plan; added `app_links` for deep linking; scoped the create-item UI to `link` / `note` / `file` only; added explicit `storage.objects` policies to `schema.sql`; enriched `seed.template.sql` to 2 departments, 3 courses, multi-module content; committed to carrying demo credentials in README.
 
 ## Active Decisions
 
@@ -48,10 +49,13 @@
 - [x] Draft schema SQL.
 - [x] Document storage buckets.
 - [x] Document Supabase web setup checklist.
+- [x] Draft seed data template.
+- [x] Add storage.objects policies for `avatars` and `course-content` to schema.
+- [x] Enrich seed template (2 departments, 3 courses, multi-module content).
 - [ ] Create Supabase project.
 - [ ] Apply schema SQL.
 - [ ] Create storage buckets.
-- [ ] Configure storage policies.
+- [ ] Verify storage policies bound correctly after buckets exist.
 - [ ] Create test users.
 - [ ] Seed required demo data.
 - [ ] Verify RLS with admin, professor, and student users.
@@ -103,6 +107,9 @@
 - [ ] Edit display name.
 - [ ] Edit bio.
 - [ ] Upload/edit avatar.
+- [ ] Add `app_links` dependency.
+- [ ] Register `scholera://` URL scheme in iOS `Info.plist`.
+- [ ] Register `scholera://` intent-filter in Android `AndroidManifest.xml`.
 - [ ] Deep link to announcement.
 - [ ] Preserve deep link through login.
 
@@ -120,6 +127,7 @@
 
 - [ ] README setup instructions.
 - [ ] README library choices.
+- [ ] README demo credentials block (admin/professor/student).
 - [ ] README screenshots/GIFs.
 - [ ] README known issues.
 - [ ] User-authored `AI_ASSISTANT_USAGE.md`.
@@ -153,10 +161,11 @@
 
 - Backend schema may not match assignment terminology.
 - RLS may block expected demo queries.
-- File upload policies may need bucket setup.
+- File upload policies rely on the `{bucket}/{id}/...` path convention — uploads that skip the id prefix will be rejected.
 - Deep linking can take longer than expected on simulator if bundle scheme config is late.
 - Final app cannot rely on mocked data, so Supabase seed data is critical.
 - `AI_ASSISTANT_USAGE.md` must be written by the user, not generated.
+- Admin dashboard counts will look small with only 3 demo auth users (1 admin, 1 professor, 1 student). This is acceptable for the prototype rubric but worth noting in the README known-issues section.
 
 ## Next Best Action
 

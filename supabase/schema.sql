@@ -513,7 +513,103 @@ to authenticated
 using (student_id = auth.uid())
 with check (student_id = auth.uid());
 
--- Storage setup must be completed in Supabase Storage.
--- Recommended buckets:
--- - avatars: public read, owner write.
--- - course-content: authenticated read by enrolled/teaching users, professor write.
+-- Storage policies.
+--
+-- Required bucket setup in Supabase Storage (create these before running the
+-- policy block, otherwise the policies reference buckets that do not yet
+-- exist):
+--   - avatars: public bucket, for profile images.
+--   - course-content: private bucket, for professor-uploaded lecture files.
+--
+-- Path conventions enforced by the app (the policies depend on these):
+--   - avatars/{user_id}/...
+--   - course-content/{section_id}/...
+
+drop policy if exists "avatars public read" on storage.objects;
+create policy "avatars public read"
+on storage.objects
+for select
+to public
+using (bucket_id = 'avatars');
+
+drop policy if exists "avatars owner insert" on storage.objects;
+create policy "avatars owner insert"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "avatars owner update" on storage.objects;
+create policy "avatars owner update"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "avatars owner delete" on storage.objects;
+create policy "avatars owner delete"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "course content role read" on storage.objects;
+create policy "course content role read"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'course-content'
+  and (
+    public.is_admin()
+    or public.teaches_section(((storage.foldername(name))[1])::uuid)
+    or public.enrolled_in_section(((storage.foldername(name))[1])::uuid)
+  )
+);
+
+drop policy if exists "course content professor insert" on storage.objects;
+create policy "course content professor insert"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'course-content'
+  and public.teaches_section(((storage.foldername(name))[1])::uuid)
+);
+
+drop policy if exists "course content professor update" on storage.objects;
+create policy "course content professor update"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'course-content'
+  and public.teaches_section(((storage.foldername(name))[1])::uuid)
+)
+with check (
+  bucket_id = 'course-content'
+  and public.teaches_section(((storage.foldername(name))[1])::uuid)
+);
+
+drop policy if exists "course content professor delete" on storage.objects;
+create policy "course content professor delete"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'course-content'
+  and public.teaches_section(((storage.foldername(name))[1])::uuid)
+);

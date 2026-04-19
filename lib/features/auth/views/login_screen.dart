@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/env.dart';
-import '../../../core/widgets/scholera_scaffold.dart';
+import '../../../app/theme/palette.dart';
+import '../../../app/theme/tokens.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -19,6 +21,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscure = true;
 
   @override
   void dispose() {
@@ -31,96 +34,137 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final env = ref.watch(appEnvProvider);
-    final isConfigured = authState.value?.isSupabaseConfigured ?? false;
+    // Whether Supabase is configured is derived from the env (static at app
+    // launch), not from the async auth state. Pulling it from env keeps the
+    // login form stable across loading transitions.
+    final isConfigured = env.hasSupabaseConfig;
     final isLoading = authState.isLoading;
+    final theme = Theme.of(context);
 
-    return ScholeraScaffold(
-      title: 'Scholera',
-      children: [
-        Text(
-          'Sign in',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Use your university account to open the right Scholera workspace.',
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        const SizedBox(height: 24),
-        if (!isConfigured) ...[
-          _SetupRequiredMessage(env: env),
-          const SizedBox(height: 24),
-        ],
-        if (authState.hasError) ...[
-          _AuthErrorMessage(message: authState.error.toString()),
-          const SizedBox(height: 16),
-        ],
-        Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _emailController,
-                enabled: isConfigured && !isLoading,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  final email = value?.trim() ?? '';
-
-                  if (email.isEmpty) {
-                    return 'Enter an email address.';
-                  }
-
-                  if (!email.contains('@')) {
-                    return 'Enter a valid email address.';
-                  }
-
-                  return null;
-                },
+    return Scaffold(
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.xl,
+                vertical: Spacing.xxl,
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _passwordController,
-                enabled: isConfigured && !isLoading,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(labelText: 'Password'),
-                onFieldSubmitted: (_) => _submit(isConfigured),
-                validator: (value) {
-                  if ((value ?? '').isEmpty) {
-                    return 'Enter a password.';
-                  }
-
-                  return null;
-                },
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - Spacing.xxl * 2,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const _Brandmark(),
+                      const SizedBox(height: Spacing.xxxl),
+                      Text(
+                        'Welcome back',
+                        style: theme.textTheme.displayMedium,
+                      ),
+                      const SizedBox(height: Spacing.sm),
+                      Text(
+                        'Sign in to open the Scholera workspace for your role.',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: Spacing.xl),
+                      if (!isConfigured) ...[
+                        _SetupRequiredNotice(env: env),
+                        const SizedBox(height: Spacing.lg),
+                      ],
+                      if (authState.hasError) ...[
+                        _AuthErrorNotice(message: authState.error.toString()),
+                        const SizedBox(height: Spacing.md),
+                      ],
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            TextFormField(
+                              controller: _emailController,
+                              enabled: isConfigured && !isLoading,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              autocorrect: false,
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                hintText: 'you@university.edu',
+                              ),
+                              validator: _validateEmail,
+                            ),
+                            const SizedBox(height: Spacing.md),
+                            TextFormField(
+                              controller: _passwordController,
+                              enabled: isConfigured && !isLoading,
+                              obscureText: _obscure,
+                              textInputAction: TextInputAction.done,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscure
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    size: 20,
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => _obscure = !_obscure),
+                                ),
+                              ),
+                              onFieldSubmitted: (_) => _submit(isConfigured),
+                              validator: _validatePassword,
+                            ),
+                            const SizedBox(height: Spacing.xl),
+                            FilledButton(
+                              onPressed: isConfigured && !isLoading
+                                  ? () => _submit(isConfigured)
+                                  : null,
+                              child: isLoading
+                                  ? const SizedBox.square(
+                                      dimension: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Palette.surface,
+                                      ),
+                                    )
+                                  : const Text('Sign in'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Expanded(child: SizedBox.shrink()),
+                      const SizedBox(height: Spacing.xl),
+                      _FooterMark(),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: isConfigured && !isLoading
-                    ? () => _submit(isConfigured)
-                    : null,
-                child: isLoading
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Sign in'),
-              ),
-            ],
-          ),
+            );
+          },
         ),
-      ],
+      ),
     );
   }
 
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) return 'Enter an email address.';
+    if (!email.contains('@')) return 'Enter a valid email address.';
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if ((value ?? '').isEmpty) return 'Enter a password.';
+    return null;
+  }
+
   void _submit(bool isConfigured) {
-    if (!isConfigured || !_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!isConfigured || !(_formKey.currentState?.validate() ?? false)) return;
 
     ref
         .read(authControllerProvider.notifier)
@@ -131,64 +175,165 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-class _SetupRequiredMessage extends StatelessWidget {
-  const _SetupRequiredMessage({required this.env});
-
-  final AppEnv env;
+class _Brandmark extends StatelessWidget {
+  const _Brandmark();
 
   @override
   Widget build(BuildContext context) {
-    final missing = <String>[
-      if (env.supabaseUrl.isEmpty) 'SUPABASE_URL',
-      if (env.supabaseAnonKey.isEmpty) 'SUPABASE_ANON_KEY',
-    ];
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: Palette.ink,
+            borderRadius: Radii.card,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            'S',
+            style: GoogleFonts.plusJakartaSans(
+              color: Palette.paper,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              height: 1,
+            ),
+          ),
+        ),
+        const SizedBox(width: Spacing.md),
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Supabase setup needed',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              'Scholera',
+              style: GoogleFonts.plusJakartaSans(
+                color: Palette.ink,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.2,
+                height: 1,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             Text(
-              'Create the Supabase project, run the schema, then launch with ${missing.join(' and ')}.',
+              'Learning management, native.',
+              style: GoogleFonts.plusJakartaSans(
+                color: Palette.inkMuted,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.4,
+                height: 1,
+              ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _FooterMark extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Built for Scholera · Mobile companion',
+        style: GoogleFonts.plusJakartaSans(
+          color: Palette.inkSubtle,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.3,
         ),
       ),
     );
   }
 }
 
-class _AuthErrorMessage extends StatelessWidget {
-  const _AuthErrorMessage({required this.message});
+class _SetupRequiredNotice extends StatelessWidget {
+  const _SetupRequiredNotice({required this.env});
+
+  final AppEnv env;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final missing = <String>[
+      if (env.supabaseUrl.isEmpty) 'SUPABASE_URL',
+      if (env.supabaseAnonKey.isEmpty) 'SUPABASE_ANON_KEY',
+    ];
+
+    return _Notice(
+      background: theme.colorScheme.primaryContainer,
+      border: theme.colorScheme.primary.withValues(alpha: 0.25),
+      title: 'Supabase setup needed',
+      titleColor: theme.colorScheme.onPrimaryContainer,
+      message:
+          'Launch with ${missing.join(' and ')} set via --dart-define-from-file=.env.',
+      messageColor: theme.colorScheme.onPrimaryContainer,
+    );
+  }
+}
+
+class _AuthErrorNotice extends StatelessWidget {
+  const _AuthErrorNotice({required this.message});
 
   final String message;
 
   @override
   Widget build(BuildContext context) {
+    return _Notice(
+      background: Palette.errorContainer,
+      border: Palette.error.withValues(alpha: 0.3),
+      title: 'Couldn\u2019t sign you in',
+      titleColor: Palette.error,
+      message: message,
+      messageColor: Palette.error,
+    );
+  }
+}
+
+class _Notice extends StatelessWidget {
+  const _Notice({
+    required this.background,
+    required this.border,
+    required this.title,
+    required this.titleColor,
+    required this.message,
+    required this.messageColor,
+  });
+
+  final Color background;
+  final Color border;
+  final String title;
+  final Color titleColor;
+  final String message;
+  final Color messageColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
+        color: background,
+        borderRadius: Radii.card,
+        border: Border.all(color: border),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          message,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onErrorContainer,
-          ),
+        padding: const EdgeInsets.all(Spacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(color: titleColor),
+            ),
+            const SizedBox(height: Spacing.xs),
+            Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(color: messageColor),
+            ),
+          ],
         ),
       ),
     );

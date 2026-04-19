@@ -144,26 +144,64 @@ Definition of done:
 - Session survives hot restart/app restart.
 - Sign-out returns to login.
 
-## Phase 3: Shared UI System
+## Phase 3: Shared UI System — COMPLETE (2026-04-19)
 
-- Build app theme with a clean Material 3 base.
-- Define spacing, text styles, semantic colors, status colors, and role accents.
-- Build shared widgets:
-  - `ScholeraScaffold`
-  - `AsyncContent`
-  - `EmptyState`
-  - `ErrorState`
-  - `LoadingSkeleton`
-  - `StatusPill`
-  - `TopicChip`
-  - `AvatarPicker`
-  - `RoleSwitcherDebugBanner` only for development if useful
-- Keep product copy practical and user-facing.
+### Design thesis: "studio light"
 
-Definition of done:
+Crisp modern product surface. Cool neutral canvas, saturated role accents, slate-family ink. Single-family sans typography. No warm cream, no editorial softness. Reads like a contemporary productivity app (Linear/Notion adjacent) rather than a scholarly journal.
+
+An earlier iteration used warm cream + Fraunces serif ("academic workshop"). User feedback pushed it away from that direction because the cream canvas felt derivative — pivoted to the cooler, confident direction captured here.
+
+### Typography
+
+- Single family: **Plus Jakarta Sans** (weights 400/500/600/700/800).
+- Delivered via `google_fonts` runtime loader (fine for prototype; bundle as assets later if cold start becomes an issue).
+
+### Palette
+
+- Canvas: paper `#F6F7F9`, surface `#FFFFFF`, surface muted `#F1F3F6`, outline `#E6E8EC`, outline-strong `#CBD1DA`.
+- Ink: primary `#0F172A`, muted `#475569`, subtle `#94A3B8`.
+- Role accents:
+  - Admin — cobalt `#1D4ED8` (institutional, confident).
+  - Professor — amber `#D97706` (warmth on a cool canvas, authorial).
+  - Student — emerald `#059669` (progress, focused).
+- Neutral (pre-auth): slate `#1E293B`.
+- Status: not_started `#94A3B8`, in_progress `#F59E0B`, complete `#10B981`.
+- Signals: error `#DC2626`, info `#2563EB`.
+
+### Token + theme structure
+
+```text
+lib/app/theme/
+  tokens.dart            Spacing, Radii, Elevation, Motion
+  palette.dart           raw colors
+  role_theme.dart        RoleTheme per AppRole + neutral
+  app_theme.dart         buildAppTheme(RoleTheme) → ThemeData
+  role_theme_scope.dart  inherited widget that applies a role's theme to a subtree
+```
+
+Each role shell wraps its subtree in `RoleThemeScope.forAppRole(...)`. Every primitive reads its accent from `Theme.of(context)` — **no widget takes a role parameter**. Adding a fourth role later means one new entry in `role_theme.dart`.
+
+### Primitives
+
+```text
+lib/core/widgets/
+  scholera_scaffold.dart  two factories: .list and .custom; optional RoleBadge in the app bar
+  async_content.dart      wraps AsyncValue<T> into loading/data/error consistently
+  empty_state.dart        serif title + sans body + optional action
+  error_state.dart        calm phrasing, retry button
+  loading_skeleton.dart   Bar, Card, List variants using shimmer
+  status_pill.dart        dot + label, reads ProgressStatus enum
+  topic_chip.dart         left-edge role-accent border, AI-extracted topic labels
+  role_badge.dart         serif initial in role-tinted circle
+```
+
+### Definition of done (met)
 
 - Loading, empty, and error states exist before feature screens multiply.
-- App has a consistent visual rhythm.
+- Three role shells look distinct at a glance (app bar tint, primary buttons, badge).
+- No widget couples itself to a role — every primitive stays reusable.
+- `flutter analyze` passes clean across the theme + widgets layer.
 
 ## Phase 4: Admin Experience
 

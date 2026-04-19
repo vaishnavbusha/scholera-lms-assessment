@@ -11,6 +11,8 @@
 - Flutter-side Supabase initialization, auth repository, profile repository, auth controller, login form, role redirect, and sign-out hooks have been added.
 - Supabase dashboard setup is still pending, so auth is not end-to-end verified yet.
 - Plan tweaks (2026-04-19): dropped `freezed` / `json_serializable` / `build_runner` / `flutter_secure_storage` from the dependency plan; added `app_links` for deep linking; scoped the create-item UI to `link` / `note` / `file` only; added explicit `storage.objects` policies to `schema.sql`; enriched `seed.template.sql` to 2 departments, 3 courses, multi-module content; committed to carrying demo credentials in README.
+- Auth verified end-to-end (2026-04-19): all three roles sign in on the Android emulator and land on the correct role shell. VS Code launch configs are in `.vscode/launch.json` using `--dart-define-from-file=.env`.
+- Phase 3 shared UI system complete (2026-04-19): "studio light" design thesis — single-family **Plus Jakarta Sans** typography, cool neutral canvas (#F6F7F9), saturated role accents (admin cobalt #1D4ED8, professor amber #D97706, student emerald #059669), slate-family ink. Tokens, role theme, and eight reusable primitives (`ScholeraScaffold`, `AsyncContent`, `EmptyState`, `ErrorState`, `LoadingSkeleton`, `StatusPill`, `TopicChip`, `RoleBadge`) live under `lib/app/theme/` and `lib/core/widgets/`. Each role shell wraps itself in `RoleThemeScope` — primitives take no role parameter. Earlier "academic workshop" palette (warm cream + Fraunces serif) was discarded because the cream canvas felt derivative.
 
 ## Active Decisions
 
@@ -40,9 +42,13 @@
 - [x] Add dependencies.
 - [x] Configure environment variables.
 - [x] Initialize Supabase.
-- [x] Configure app theme.
+- [x] Configure app theme (Material 3 + Fraunces/Manrope + role accents).
 - [x] Configure GoRouter.
-- [ ] Add shared loading, empty, and error widgets.
+- [x] Add design token system (`lib/app/theme/tokens.dart`, `palette.dart`).
+- [x] Add role theme + RoleThemeScope.
+- [x] Add shared loading, empty, and error widgets.
+- [x] Add StatusPill, TopicChip, RoleBadge primitives.
+- [x] Add VS Code launch configs using `--dart-define-from-file=.env`.
 
 ### Supabase Backend
 
@@ -62,12 +68,12 @@
 
 ### Auth
 
-- [ ] Email/password sign-in. App-side code exists; needs Supabase project verification.
-- [ ] Session restore. App-side code exists; needs Supabase project verification.
-- [ ] Profile role fetch. App-side code exists; needs Supabase project verification.
-- [ ] Role-based route redirect. App-side code exists; needs Supabase project verification.
+- [x] Email/password sign-in.
+- [x] Session restore.
+- [x] Profile role fetch.
+- [x] Role-based route redirect.
 - [ ] Expired session handling.
-- [ ] Sign-out from each role. App-side hooks exist; needs Supabase project verification.
+- [x] Sign-out from each role.
 
 ### Admin
 
@@ -169,7 +175,7 @@
 
 ## Next Best Action
 
-Create the Supabase dashboard project, apply `supabase/schema.sql`, create buckets and test users, then verify email/password auth, profile role lookup, role routing, and sign-out end to end.
+Phase 3 shared UI is live. Next is Phase 4: the admin experience — dashboard stats, departments list, department detail, professor detail. Use `AsyncContent` + `EmptyState` + `LoadingSkeleton` on every list, and `RoleBadge` + `ScholeraScaffold.list` on every screen. All admin data comes from Supabase (no fixtures).
 
 ## Commit Checkpoints
 

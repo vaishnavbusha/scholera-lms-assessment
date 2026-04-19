@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/theme/role_theme_scope.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/scholera_scaffold.dart';
 import '../../auth/controllers/auth_controller.dart';
+import '../../auth/models/app_role.dart';
 
 class StudentCoursesScreen extends ConsumerWidget {
   const StudentCoursesScreen({super.key});
@@ -12,26 +15,27 @@ class StudentCoursesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ScholeraScaffold(
-      title: 'Student',
-      actions: [
-        TextButton(
-          onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
-          child: const Text('Sign out'),
-        ),
-      ],
-      children: [
-        Text(
-          'My courses',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Enrolled courses, read-only modules, announcements, and personal roadmap progress will live here.',
-        ),
-      ],
+    return RoleThemeScope.forAppRole(
+      role: AppRole.student,
+      child: ScholeraScaffold.list(
+        title: 'My courses',
+        subtitle: 'Scholera · Student',
+        showRoleBadge: true,
+        actions: [
+          TextButton(
+            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+            child: const Text('Sign out'),
+          ),
+        ],
+        children: const [
+          EmptyState(
+            icon: Icons.auto_stories_outlined,
+            title: 'Your enrolled courses land next',
+            message:
+                'Announcements, modules, and your personal roadmap progress will open from here once the student flows are built.',
+          ),
+        ],
+      ),
     );
   }
 }

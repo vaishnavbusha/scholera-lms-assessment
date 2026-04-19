@@ -10,12 +10,18 @@ Build a Flutter mobile app for Scholera, an AI-native LMS, with Supabase auth/da
 
 - This is the submission repository.
 - `assessment-rubrics.md` was copied here from the assessment repository as local context.
-- The Flutter app has been scaffolded for iOS and Android.
-- A basic Riverpod, GoRouter, Material 3, MVC-style app shell exists.
-- Supabase schema/config planning exists in `supabase/schema.sql`, `supabase/README.md`, `.env.example`, and `lib/app/env.dart`.
-- Flutter-side Supabase initialization and auth/profile controller wiring exists.
-- Auth has not been verified end to end because the Supabase dashboard project, buckets, users, and seed data are not set up yet.
-- Planning docs exist and should be treated as current project memory.
+- The Flutter app is scaffolded for iOS and Android and runs on the Android emulator.
+- Riverpod + GoRouter + Material 3 + MVC feature structure in place.
+- Supabase project is live: schema, storage policies, buckets (`avatars` public, `course-content` private), three auth users (admin / professor / student), and the enriched demo seed are applied.
+- **Auth is verified end-to-end.** All three roles sign in and land in the correct role shell on the Android emulator.
+- **Phase 3 shared UI system is complete.** "Studio light" design: single-family Plus Jakarta Sans typography, cool neutral canvas, saturated role accents (admin cobalt, professor amber, student emerald). Tokens, `RoleThemeScope`, and eight reusable primitives live under `lib/app/theme/` and `lib/core/widgets/`.
+- Planning docs are kept current — treat `PROJECT_TRACKER.md` as the canonical status board.
+
+## Launch
+
+Use VS Code's **Run and Debug** panel → pick "Scholera (debug)" → F5.
+
+The config at `.vscode/launch.json` passes `--dart-define-from-file=.env`. `.env` is gitignored and contains the Supabase URL + publishable key. `env.dart` accepts either `SUPABASE_ANON_KEY` or the newer `SUPABASE_PUBLISHABLE_KEY` name.
 
 ## Required Reading For Future Conversations
 
@@ -66,16 +72,18 @@ Riverpod should expose repositories and controllers. Views should not directly q
 
 ## Build Priority
 
-1. Create/configure Supabase project using `supabase/schema.sql`.
-2. Create buckets, test users, and seed data.
-3. Verify auth and role-based routing end to end.
-4. Build shared UI states.
-5. Build admin read flow.
+Steps 1–4 are **done**. Next active step is 5.
+
+1. ~~Create/configure Supabase project using `supabase/schema.sql`.~~
+2. ~~Create buckets, test users, and seed data.~~
+3. ~~Verify auth and role-based routing end to end.~~
+4. ~~Build shared UI states (tokens, role theme, primitives).~~
+5. Build admin read flow (dashboard stats, departments, department detail, professor detail).
 6. Build professor course/module/announcement/roadmap write flow.
 7. Build student course/module/announcement/roadmap progress flow.
 8. Add profile editing.
-9. Add deep links.
-10. Polish states and README.
+9. Add deep links (`app_links`, iOS `Info.plist`, Android `AndroidManifest.xml`).
+10. Polish states, write README (with demo credentials block), record demo.
 
 ## Important Assignment Constraints
 

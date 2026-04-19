@@ -8,6 +8,7 @@ import '../features/admin/views/professor_detail_screen.dart';
 import '../features/auth/controllers/auth_controller.dart';
 import '../features/auth/views/login_screen.dart';
 import '../features/auth/models/app_role.dart';
+import '../features/professor/views/professor_course_screen.dart';
 import '../features/professor/views/professor_courses_screen.dart';
 import '../features/student/views/student_courses_screen.dart';
 
@@ -84,6 +85,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: ProfessorCoursesScreen.routePath,
         name: ProfessorCoursesScreen.routeName,
         builder: (context, state) => const ProfessorCoursesScreen(),
+        routes: [
+          GoRoute(
+            path: ProfessorCourseScreen.routePath,
+            name: ProfessorCourseScreen.routeName,
+            builder: (context, state) => ProfessorCourseScreen(
+              sectionId: state.pathParameters['sectionId']!,
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: StudentCoursesScreen.routePath,

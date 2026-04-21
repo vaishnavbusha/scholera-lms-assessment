@@ -8,9 +8,9 @@ import '../../../core/widgets/async_content.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_skeleton.dart';
 import '../../../core/widgets/scholera_scaffold.dart';
-import '../../auth/controllers/auth_controller.dart';
 import '../../auth/models/app_role.dart';
 import '../../courses/models/course_section.dart';
+import '../../profile/views/profile_screen.dart';
 import '../controllers/professor_providers.dart';
 import 'professor_course_screen.dart';
 import 'widgets/course_section_tile.dart';
@@ -32,9 +32,10 @@ class ProfessorCoursesScreen extends ConsumerWidget {
         subtitle: 'Scholera \u00b7 Professor',
         showRoleBadge: true,
         actions: [
-          TextButton(
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
-            child: const Text('Sign out'),
+          IconButton(
+            onPressed: () => context.pushNamed(ProfileScreen.routeName),
+            icon: const Icon(Icons.account_circle_outlined),
+            tooltip: 'Profile',
           ),
         ],
         body: RefreshIndicator(

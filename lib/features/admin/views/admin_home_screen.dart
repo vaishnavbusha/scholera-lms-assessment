@@ -8,8 +8,8 @@ import '../../../core/widgets/async_content.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_skeleton.dart';
 import '../../../core/widgets/scholera_scaffold.dart';
-import '../../auth/controllers/auth_controller.dart';
 import '../../auth/models/app_role.dart';
+import '../../profile/views/profile_screen.dart';
 import '../controllers/admin_providers.dart';
 import '../models/department_with_professors.dart';
 import '../models/institution_stats.dart';
@@ -35,9 +35,10 @@ class AdminHomeScreen extends ConsumerWidget {
         subtitle: 'Scholera · Admin',
         showRoleBadge: true,
         actions: [
-          TextButton(
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
-            child: const Text('Sign out'),
+          IconButton(
+            onPressed: () => context.pushNamed(ProfileScreen.routeName),
+            icon: const Icon(Icons.account_circle_outlined),
+            tooltip: 'Profile',
           ),
         ],
         body: RefreshIndicator(

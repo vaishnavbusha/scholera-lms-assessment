@@ -115,10 +115,10 @@
 
 ### Shared
 
-- [ ] View profile.
-- [ ] Edit display name.
-- [ ] Edit bio.
-- [ ] Upload/edit avatar.
+- [x] View profile.
+- [x] Edit display name.
+- [x] Edit bio.
+- [x] Upload/edit avatar.
 - [ ] Add `app_links` dependency.
 - [ ] Register `scholera://` URL scheme in iOS `Info.plist`.
 - [ ] Register `scholera://` intent-filter in Android `AndroidManifest.xml`.

@@ -53,6 +53,24 @@ class AuthController extends AsyncNotifier<AuthSessionState> {
     });
   }
 
+  /// Re-hydrates the profile attached to the current auth state. Call this
+  /// after editing the profile so the display name / avatar updates
+  /// everywhere the auth state is observed.
+  Future<void> refreshProfile() async {
+    final current = state.value;
+    if (current == null || !current.isAuthenticated) return;
+
+    final profile = await ref
+        .read(profileRepositoryProvider)
+        .fetchCurrentProfile();
+    state = AsyncData(
+      AuthSessionState.authenticated(
+        session: current.session!,
+        profile: profile,
+      ),
+    );
+  }
+
   Future<void> signOut() async {
     final isConfigured = ref.read(supabaseConfiguredProvider);
 

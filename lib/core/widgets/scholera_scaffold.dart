@@ -18,6 +18,7 @@ class ScholeraScaffold extends StatelessWidget {
     this.subtitle,
     this.actions,
     this.showRoleBadge = false,
+    this.onRoleBadgeTap,
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.children,
@@ -31,6 +32,7 @@ class ScholeraScaffold extends StatelessWidget {
     String? subtitle,
     List<Widget>? actions,
     bool showRoleBadge = false,
+    VoidCallback? onRoleBadgeTap,
     Widget? floatingActionButton,
     Widget? bottomNavigationBar,
     required List<Widget> children,
@@ -41,6 +43,7 @@ class ScholeraScaffold extends StatelessWidget {
       subtitle: subtitle,
       actions: actions,
       showRoleBadge: showRoleBadge,
+      onRoleBadgeTap: onRoleBadgeTap,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       children: children,
@@ -53,6 +56,7 @@ class ScholeraScaffold extends StatelessWidget {
     String? subtitle,
     List<Widget>? actions,
     bool showRoleBadge = false,
+    VoidCallback? onRoleBadgeTap,
     Widget? floatingActionButton,
     Widget? bottomNavigationBar,
     required Widget body,
@@ -63,6 +67,7 @@ class ScholeraScaffold extends StatelessWidget {
       subtitle: subtitle,
       actions: actions,
       showRoleBadge: showRoleBadge,
+      onRoleBadgeTap: onRoleBadgeTap,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       body: body,
@@ -73,6 +78,7 @@ class ScholeraScaffold extends StatelessWidget {
   final String? subtitle;
   final List<Widget>? actions;
   final bool showRoleBadge;
+  final VoidCallback? onRoleBadgeTap;
   final Widget? floatingActionButton;
   final Widget? bottomNavigationBar;
   final List<Widget>? children;
@@ -106,7 +112,7 @@ class ScholeraScaffold extends StatelessWidget {
           if (showRoleBadge)
             Padding(
               padding: const EdgeInsets.only(right: Spacing.lg),
-              child: const RoleBadge(),
+              child: RoleBadge(onTap: onRoleBadgeTap),
             ),
           if (actions != null) ...actions!,
         ],

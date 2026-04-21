@@ -119,11 +119,11 @@
 - [x] Edit display name.
 - [x] Edit bio.
 - [x] Upload/edit avatar.
-- [ ] Add `app_links` dependency.
-- [ ] Register `scholera://` URL scheme in iOS `Info.plist`.
-- [ ] Register `scholera://` intent-filter in Android `AndroidManifest.xml`.
-- [ ] Deep link to announcement.
-- [ ] Preserve deep link through login.
+- [x] Add `app_links` dependency.
+- [x] Register `scholera://` URL scheme in iOS `Info.plist`.
+- [x] Register `scholera://` intent-filter in Android `AndroidManifest.xml`.
+- [x] Deep link to announcement (scholera://courses/{id}/announcements/{id}).
+- [x] Preserve deep link through login.
 
 ### Polish
 
@@ -181,7 +181,7 @@
 
 ## Next Best Action
 
-Phases 4, 5, and 6 are complete — all three role experiences are live end-to-end against Supabase. Next is Phase 7: shared flows. Profile view + edit (any role), avatar upload to the `avatars` bucket, deep linking for `scholera://courses/{id}/announcements/{id}` via `app_links`, iOS `Info.plist` URL scheme, and Android `AndroidManifest.xml` intent-filter. Then Phase 8: polish (expired-session handling, pull-to-refresh audit) and the README + demo credentials + screenshots pass.
+All required features from the rubric are implemented (auth, role routing, admin / professor / student experiences, profile, deep linking). Remaining work is submission polish: README with setup + demo credentials + screenshots + known issues, user-authored `AI_ASSISTANT_USAGE.md`, a 5-10 minute demo video, and an expired-session smoke test.
 
 ## Commit Checkpoints
 

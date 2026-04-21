@@ -31,13 +31,7 @@ class ProfessorCoursesScreen extends ConsumerWidget {
         title: 'My courses',
         subtitle: 'Scholera \u00b7 Professor',
         showRoleBadge: true,
-        actions: [
-          IconButton(
-            onPressed: () => context.pushNamed(ProfileScreen.routeName),
-            icon: const Icon(Icons.account_circle_outlined),
-            tooltip: 'Profile',
-          ),
-        ],
+        onRoleBadgeTap: () => context.pushNamed(ProfileScreen.routeName),
         body: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(professorCourseSectionsProvider);

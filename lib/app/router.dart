@@ -8,6 +8,7 @@ import '../features/admin/views/professor_detail_screen.dart';
 import '../features/auth/controllers/auth_controller.dart';
 import '../features/auth/views/login_screen.dart';
 import '../features/auth/models/app_role.dart';
+import '../features/deep_links/deep_link_controller.dart';
 import '../features/profile/views/profile_screen.dart';
 import '../features/professor/views/professor_course_screen.dart';
 import '../features/professor/views/professor_courses_screen.dart';
@@ -23,20 +24,22 @@ import '../features/student/views/student_courses_screen.dart';
 /// tears down and rebuilds the whole navigator. Screens would lose their
 /// state (the login screen would remount, losing typed text mid-sign-in).
 ///
-/// Instead, hold a [ChangeNotifier] that re-fires on every auth change, pass
-/// it as `refreshListenable`, and `ref.read` the current auth snapshot
-/// inside the `redirect` callback. GoRouter re-evaluates redirects without
-/// rebuilding the navigator.
+/// Instead, hold a [ChangeNotifier] that re-fires on every auth change and
+/// on every deep-link arrival, pass it as `refreshListenable`, and
+/// `ref.read` the current auth and deep-link snapshots inside the
+/// `redirect` callback. GoRouter re-evaluates redirects without rebuilding
+/// the navigator.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authListenable = _AuthChangeNotifier(ref);
-  ref.onDispose(authListenable.dispose);
+  final refreshListenable = _RouterRefreshNotifier(ref);
+  ref.onDispose(refreshListenable.dispose);
 
   return GoRouter(
     initialLocation: LoginScreen.routePath,
-    refreshListenable: authListenable,
+    refreshListenable: refreshListenable,
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
       final sessionState = authState.value;
+      final pendingLink = ref.read(deepLinkControllerProvider);
       final isLoggingIn = state.matchedLocation == LoginScreen.routePath;
 
       if (authState.isLoading || sessionState == null) {
@@ -48,7 +51,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (!sessionState.isAuthenticated) {
+        // Leave the pending deep link alone so it can be consumed after
+        // the user finishes signing in.
         return isLoggingIn ? null : LoginScreen.routePath;
+      }
+
+      // Authenticated: if there's a pending deep link that resolves to an
+      // in-app path, consume it and route there.
+      if (pendingLink != null) {
+        final target = deepLinkToPath(pendingLink);
+        ref.read(deepLinkControllerProvider.notifier).consume();
+        if (target != null) return target;
       }
 
       if (isLoggingIn) {
@@ -139,23 +152,30 @@ String _homePathForRole(AppRole role) {
   };
 }
 
-/// Bridges [authControllerProvider] into a [Listenable] so GoRouter can
-/// re-run its redirect when auth state changes — without recreating the
-/// router itself.
-class _AuthChangeNotifier extends ChangeNotifier {
-  _AuthChangeNotifier(Ref ref) {
-    _subscription = ref.listen<Object?>(
+/// Bridges [authControllerProvider] and [deepLinkControllerProvider] into a
+/// [Listenable] so GoRouter can re-run its redirect when auth state or a
+/// pending deep link changes — without recreating the router itself.
+class _RouterRefreshNotifier extends ChangeNotifier {
+  _RouterRefreshNotifier(Ref ref) {
+    _authSub = ref.listen<Object?>(
       authControllerProvider,
+      (_, __) => notifyListeners(),
+      fireImmediately: false,
+    );
+    _deepLinkSub = ref.listen<Object?>(
+      deepLinkControllerProvider,
       (_, __) => notifyListeners(),
       fireImmediately: false,
     );
   }
 
-  late final ProviderSubscription<Object?> _subscription;
+  late final ProviderSubscription<Object?> _authSub;
+  late final ProviderSubscription<Object?> _deepLinkSub;
 
   @override
   void dispose() {
-    _subscription.close();
+    _authSub.close();
+    _deepLinkSub.close();
     super.dispose();
   }
 }

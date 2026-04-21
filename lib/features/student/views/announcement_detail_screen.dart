@@ -8,7 +8,7 @@ import '../../../core/widgets/async_content.dart';
 import '../../../core/widgets/scholera_scaffold.dart';
 import '../../../data/repositories/announcement_repository.dart';
 import '../../announcements/models/announcement.dart';
-import '../../auth/models/app_role.dart';
+import '../../auth/controllers/current_profile_provider.dart';
 
 /// Full-screen announcement reader. The deep-link target — the URL scheme
 /// `scholera://courses/{sectionId}/announcements/{id}` will eventually map
@@ -29,9 +29,10 @@ class AnnouncementDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final future = ref.watch(_announcementByIdProvider(announcementId));
+    final role = ref.watch(currentProfileProvider).role;
 
     return RoleThemeScope.forAppRole(
-      role: AppRole.student,
+      role: role,
       child: AsyncContent<Announcement>(
         value: future,
         errorTitle: 'Couldn\u2019t load that announcement',

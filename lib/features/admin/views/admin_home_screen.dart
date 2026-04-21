@@ -34,13 +34,7 @@ class AdminHomeScreen extends ConsumerWidget {
         title: 'Institution',
         subtitle: 'Scholera · Admin',
         showRoleBadge: true,
-        actions: [
-          IconButton(
-            onPressed: () => context.pushNamed(ProfileScreen.routeName),
-            icon: const Icon(Icons.account_circle_outlined),
-            tooltip: 'Profile',
-          ),
-        ],
+        onRoleBadgeTap: () => context.pushNamed(ProfileScreen.routeName),
         body: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(institutionStatsProvider);

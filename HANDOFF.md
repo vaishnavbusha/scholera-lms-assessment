@@ -18,6 +18,7 @@ Build a Flutter mobile app for Scholera, an AI-native LMS, with Supabase auth/da
 - **Phase 4 admin experience is complete.** Dashboard stats (students/professors/courses/departments) + departments list on the admin home, `DepartmentDetailScreen` and `ProfessorDetailScreen` as drill-downs, all behind `AdminRepository` + Riverpod `FutureProvider` family. Pull-to-refresh on every admin screen.
 - **Phase 5 professor experience is complete.** Professor course list, tabbed `ProfessorCourseScreen` (Announcements, Modules, Roadmap). Announcement create-sheet, module create-sheet, item create-sheet with type picker (link / note / file) including PDF/PPT upload to `course-content/{sectionId}/...`. Roadmap tab: timeline-tree layout with extracted topics and tappable coverage status picker updating `roadmap_nodes.professor_status`. All operations go through RLS-gated Supabase calls.
 - **Phase 6 student experience is complete.** `StudentCoursesScreen` enrolled-sections list. `StudentCourseScreen` three-tab shell: read-only announcements (tap → `AnnouncementDetailScreen`), read-only modules (items still tappable for link/note/file), and a student roadmap reusing `RoadmapTimeline` with a tappable "You:" progress picker that upserts `student_progress`.
+- **Phase 7 shared flows are complete.** `ProfileScreen` is shared across roles with avatar upload to `avatars/{userId}/...`, editable display name + bio, and sign-out; access via a tappable role badge in each role home's app bar (no separate icon button). Deep linking uses the `app_links` package + `scholera://` URL scheme registered in iOS `Info.plist` and Android `AndroidManifest.xml`; `DeepLinkController` holds the pending URI, and the router consumes it after auth, so links arriving pre-login are replayed after sign-in.
 - Planning docs are kept current — treat `PROJECT_TRACKER.md` as the canonical status board.
 
 ## Launch
@@ -84,8 +85,8 @@ Steps 1–4 are **done**. Next active step is 5.
 5. ~~Build admin read flow (dashboard stats, departments, department detail, professor detail).~~
 6. ~~Build professor course/module/announcement/roadmap write flow.~~
 7. ~~Build student course/module/announcement/roadmap progress flow.~~
-8. Add profile editing.
-9. Add deep links (`app_links`, iOS `Info.plist`, Android `AndroidManifest.xml`).
+8. ~~Add profile editing.~~
+9. ~~Add deep links (`app_links`, iOS `Info.plist`, Android `AndroidManifest.xml`).~~
 10. Polish states, write README (with demo credentials block), record demo.
 
 ## Important Assignment Constraints

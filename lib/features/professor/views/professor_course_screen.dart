@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/role_theme_scope.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/widgets/async_content.dart';
-import '../../../core/widgets/empty_state.dart';
 import '../../auth/models/app_role.dart';
 import '../../courses/models/course_section.dart';
 import '../controllers/professor_providers.dart';
 import 'tabs/announcements_tab.dart';
 import 'tabs/modules_tab.dart';
+import 'tabs/professor_roadmap_tab.dart';
 
 /// Professor's course management shell. Three tabs (Announcements, Modules,
 /// Roadmap) mirror the rubric's course management structure. Each tab owns
@@ -77,12 +77,7 @@ class _ProfessorCourseScreenState extends ConsumerState<ProfessorCourseScreen>
               children: [
                 AnnouncementsTab(sectionId: widget.sectionId),
                 ModulesTab(sectionId: widget.sectionId),
-                const _ComingSoon(
-                  title: 'Roadmap lands next',
-                  message:
-                      'Now that modules exist, the roadmap view with extracted topics and coverage status is the final piece of the professor experience.',
-                  icon: Icons.timeline_outlined,
-                ),
+                ProfessorRoadmapTab(sectionId: widget.sectionId),
               ],
             ),
           );
@@ -150,24 +145,3 @@ class _CourseAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-class _ComingSoon extends StatelessWidget {
-  const _ComingSoon({
-    required this.title,
-    required this.message,
-    required this.icon,
-  });
-
-  final String title;
-  final String message;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: Spacing.screenPadding,
-      children: [
-        EmptyState(icon: icon, title: title, message: message, compact: true),
-      ],
-    );
-  }
-}

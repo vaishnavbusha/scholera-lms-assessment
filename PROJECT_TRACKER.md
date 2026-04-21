@@ -16,6 +16,7 @@
 - Phase 4 admin experience complete (2026-04-19): stats dashboard + departments list merged on `AdminHomeScreen`, `DepartmentDetailScreen` and `ProfessorDetailScreen` as drill-downs. `AdminRepository` + Riverpod `FutureProvider` family handle the four queries. Pull-to-refresh on every admin screen. All data live from Supabase — no fixtures.
 - Phase 5a-5c professor experience (partial) complete (2026-04-19): `ProfessorCoursesScreen` lists sections the professor teaches; `ProfessorCourseScreen` is a tabbed shell (Announcements / Modules / Roadmap); Announcements tab is fully functional with list + `CreateAnnouncementSheet` (modal bottom sheet). Remaining: modules + roadmap.
 - Phase 5d-5e professor modules complete (2026-04-20): `ModulesTab` lists modules with nested items (type-iconed rows); `CreateModuleSheet` creates a module with auto-incrementing position; `CreateModuleItemSheet` adds a link / note / file item. File uploads use `file_picker` 11 and store to `course-content/{sectionId}/{timestamp}_{filename}` per the storage path convention. Cleanup on row-insert failure.
+- Phase 5f professor roadmap complete (2026-04-20): `ProfessorRoadmapTab` groups modules with items underneath; each item shows extracted topics as `TopicChip`s and a tappable coverage-status picker that updates `roadmap_nodes.professor_status` through `RoadmapRepository`. Shared `RoadmapItemCard`, `RoadmapModuleSection`, and `RoadmapStatusPicker` widgets so the student roadmap (Phase 6) reuses them.
 
 ## Active Decisions
 
@@ -97,8 +98,8 @@
 - [x] Add link item.
 - [x] Add note item.
 - [x] Upload PDF/PPT item.
-- [ ] Professor roadmap with topics.
-- [ ] Update professor coverage status.
+- [x] Professor roadmap with topics.
+- [x] Update professor coverage status.
 
 ### Student
 
@@ -179,7 +180,7 @@
 
 ## Next Best Action
 
-Phase 4 admin experience is live. Next is Phase 5: the professor experience — `ProfessorCoursesScreen` (list sections the professor teaches), `ProfessorCourseScreen` with tabs (Announcements, Modules, Roadmap), create-announcement sheet, create-module sheet, add-module-item sheet (link / note / file upload). Then Phase 5b: the professor roadmap view with topics and coverage status toggle.
+Phases 4 and 5 (admin + professor) are fully implemented end-to-end against Supabase. Next is Phase 6: the student experience — `StudentCoursesScreen` (enrolled courses), `StudentCourseScreen` with tabs (Announcements read-only + detail, Modules read-only, Roadmap with professor coverage visible and the student's own progress separately trackable). The roadmap widgets (`RoadmapItemCard`, `RoadmapModuleSection`, `RoadmapStatusPicker`) are already built to accept a student-progress callback, so the student roadmap is mostly repository + query work.
 
 ## Commit Checkpoints
 

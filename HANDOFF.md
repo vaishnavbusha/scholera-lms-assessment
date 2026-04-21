@@ -16,7 +16,8 @@ Build a Flutter mobile app for Scholera, an AI-native LMS, with Supabase auth/da
 - **Auth is verified end-to-end.** All three roles sign in and land in the correct role shell on the Android emulator.
 - **Phase 3 shared UI system is complete.** "Studio light" design: single-family Plus Jakarta Sans typography, cool neutral canvas, saturated role accents (admin cobalt, professor amber, student emerald). Tokens, `RoleThemeScope`, and eight reusable primitives live under `lib/app/theme/` and `lib/core/widgets/`.
 - **Phase 4 admin experience is complete.** Dashboard stats (students/professors/courses/departments) + departments list on the admin home, `DepartmentDetailScreen` and `ProfessorDetailScreen` as drill-downs, all behind `AdminRepository` + Riverpod `FutureProvider` family. Pull-to-refresh on every admin screen.
-- **Phase 5 professor experience is complete.** Professor course list, tabbed `ProfessorCourseScreen` (Announcements, Modules, Roadmap). Announcement create-sheet, module create-sheet, item create-sheet with type picker (link / note / file) including PDF/PPT upload to `course-content/{sectionId}/...`. Roadmap tab: grouped modules, items with extracted topics as chips, tappable coverage status picker updating `roadmap_nodes.professor_status`. All operations go through RLS-gated Supabase calls.
+- **Phase 5 professor experience is complete.** Professor course list, tabbed `ProfessorCourseScreen` (Announcements, Modules, Roadmap). Announcement create-sheet, module create-sheet, item create-sheet with type picker (link / note / file) including PDF/PPT upload to `course-content/{sectionId}/...`. Roadmap tab: timeline-tree layout with extracted topics and tappable coverage status picker updating `roadmap_nodes.professor_status`. All operations go through RLS-gated Supabase calls.
+- **Phase 6 student experience is complete.** `StudentCoursesScreen` enrolled-sections list. `StudentCourseScreen` three-tab shell: read-only announcements (tap → `AnnouncementDetailScreen`), read-only modules (items still tappable for link/note/file), and a student roadmap reusing `RoadmapTimeline` with a tappable "You:" progress picker that upserts `student_progress`.
 - Planning docs are kept current — treat `PROJECT_TRACKER.md` as the canonical status board.
 
 ## Launch
@@ -82,7 +83,7 @@ Steps 1–4 are **done**. Next active step is 5.
 4. ~~Build shared UI states (tokens, role theme, primitives).~~
 5. ~~Build admin read flow (dashboard stats, departments, department detail, professor detail).~~
 6. ~~Build professor course/module/announcement/roadmap write flow.~~
-7. Build student course/module/announcement/roadmap progress flow.
+7. ~~Build student course/module/announcement/roadmap progress flow.~~
 8. Add profile editing.
 9. Add deep links (`app_links`, iOS `Info.plist`, Android `AndroidManifest.xml`).
 10. Polish states, write README (with demo credentials block), record demo.

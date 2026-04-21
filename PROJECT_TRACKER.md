@@ -16,7 +16,8 @@
 - Phase 4 admin experience complete (2026-04-19): stats dashboard + departments list merged on `AdminHomeScreen`, `DepartmentDetailScreen` and `ProfessorDetailScreen` as drill-downs. `AdminRepository` + Riverpod `FutureProvider` family handle the four queries. Pull-to-refresh on every admin screen. All data live from Supabase — no fixtures.
 - Phase 5a-5c professor experience (partial) complete (2026-04-19): `ProfessorCoursesScreen` lists sections the professor teaches; `ProfessorCourseScreen` is a tabbed shell (Announcements / Modules / Roadmap); Announcements tab is fully functional with list + `CreateAnnouncementSheet` (modal bottom sheet). Remaining: modules + roadmap.
 - Phase 5d-5e professor modules complete (2026-04-20): `ModulesTab` lists modules with nested items (type-iconed rows); `CreateModuleSheet` creates a module with auto-incrementing position; `CreateModuleItemSheet` adds a link / note / file item. File uploads use `file_picker` 11 and store to `course-content/{sectionId}/{timestamp}_{filename}` per the storage path convention. Cleanup on row-insert failure.
-- Phase 5f professor roadmap complete (2026-04-20): `ProfessorRoadmapTab` groups modules with items underneath; each item shows extracted topics as `TopicChip`s and a tappable coverage-status picker that updates `roadmap_nodes.professor_status` through `RoadmapRepository`. Shared `RoadmapItemCard`, `RoadmapModuleSection`, and `RoadmapStatusPicker` widgets so the student roadmap (Phase 6) reuses them.
+- Phase 5f professor roadmap complete (2026-04-20): `ProfessorRoadmapTab` groups modules with items underneath; each item shows extracted topics as `TopicChip`s and a tappable coverage-status picker that updates `roadmap_nodes.professor_status` through `RoadmapRepository`. Shared `RoadmapItemCard` and `RoadmapStatusPicker` widgets so the student roadmap reuses them. Later rebuilt the section layout into a timeline-tree (`RoadmapTimeline`): continuous vertical spine, module nodes, item nodes hanging below.
+- Phase 6 student experience complete (2026-04-20): `StudentCoursesScreen` lists enrolled sections; `StudentCourseScreen` is a tabbed shell matching the professor's three-tab layout with emerald accent. `StudentAnnouncementsTab` is read-only with tap-to-open `AnnouncementDetailScreen` (also positioned as the deep-link target). `StudentModulesTab` is read-only. `StudentRoadmapTab` reuses `RoadmapTimeline` with a tappable "You:" picker that upserts `student_progress`, professor coverage shown as a read-only pill next to it.
 
 ## Active Decisions
 
@@ -103,14 +104,14 @@
 
 ### Student
 
-- [ ] Student course list.
-- [ ] Course detail tabs.
-- [ ] Announcements read-only list.
-- [ ] Announcement detail.
-- [ ] Modules read-only list.
-- [ ] Student roadmap with topics.
-- [ ] Show professor coverage status.
-- [ ] Update student personal progress.
+- [x] Student course list.
+- [x] Course detail tabs (Announcements / Modules / Roadmap, emerald accent).
+- [x] Announcements read-only list.
+- [x] Announcement detail screen.
+- [x] Modules read-only list (items still tappable for link/note/file).
+- [x] Student roadmap with topics (reuses `RoadmapTimeline`).
+- [x] Show professor coverage status (read-only pill).
+- [x] Update student personal progress (tappable "You:" picker upserting `student_progress`).
 
 ### Shared
 
@@ -180,7 +181,7 @@
 
 ## Next Best Action
 
-Phases 4 and 5 (admin + professor) are fully implemented end-to-end against Supabase. Next is Phase 6: the student experience — `StudentCoursesScreen` (enrolled courses), `StudentCourseScreen` with tabs (Announcements read-only + detail, Modules read-only, Roadmap with professor coverage visible and the student's own progress separately trackable). The roadmap widgets (`RoadmapItemCard`, `RoadmapModuleSection`, `RoadmapStatusPicker`) are already built to accept a student-progress callback, so the student roadmap is mostly repository + query work.
+Phases 4, 5, and 6 are complete — all three role experiences are live end-to-end against Supabase. Next is Phase 7: shared flows. Profile view + edit (any role), avatar upload to the `avatars` bucket, deep linking for `scholera://courses/{id}/announcements/{id}` via `app_links`, iOS `Info.plist` URL scheme, and Android `AndroidManifest.xml` intent-filter. Then Phase 8: polish (expired-session handling, pull-to-refresh audit) and the README + demo credentials + screenshots pass.
 
 ## Commit Checkpoints
 

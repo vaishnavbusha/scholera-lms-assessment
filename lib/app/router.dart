@@ -10,6 +10,8 @@ import '../features/auth/views/login_screen.dart';
 import '../features/auth/models/app_role.dart';
 import '../features/professor/views/professor_course_screen.dart';
 import '../features/professor/views/professor_courses_screen.dart';
+import '../features/student/views/announcement_detail_screen.dart';
+import '../features/student/views/student_course_screen.dart';
 import '../features/student/views/student_courses_screen.dart';
 
 /// The app's [GoRouter]. Created once per app lifetime.
@@ -99,6 +101,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: StudentCoursesScreen.routePath,
         name: StudentCoursesScreen.routeName,
         builder: (context, state) => const StudentCoursesScreen(),
+        routes: [
+          GoRoute(
+            path: StudentCourseScreen.routePath,
+            name: StudentCourseScreen.routeName,
+            builder: (context, state) => StudentCourseScreen(
+              sectionId: state.pathParameters['sectionId']!,
+            ),
+            routes: [
+              GoRoute(
+                path: AnnouncementDetailScreen.routePath,
+                name: AnnouncementDetailScreen.routeName,
+                builder: (context, state) => AnnouncementDetailScreen(
+                  sectionId: state.pathParameters['sectionId']!,
+                  announcementId: state.pathParameters['announcementId']!,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

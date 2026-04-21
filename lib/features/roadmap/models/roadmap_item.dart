@@ -19,24 +19,22 @@ class RoadmapItem {
   });
 
   factory RoadmapItem.fromJson(Map<String, dynamic> json) {
-    final rawTopics = (json['topics'] as List<dynamic>? ?? const [])
-        .cast<Map<String, dynamic>>();
-    final topics = rawTopics.map(Topic.fromJson).toList();
+    final topics = _asRowList(json['topics']).map(Topic.fromJson).toList();
 
-    final rawNodes = (json['roadmap_nodes'] as List<dynamic>? ?? const [])
-        .cast<Map<String, dynamic>>();
-    final professorStatus = rawNodes.isEmpty
+    // roadmap_nodes has UNIQUE(module_item_id) so PostgREST may return the
+    // embedded field as either a list (length 0 or 1) or a single object.
+    // Handle both shapes.
+    final nodes = _asRowList(json['roadmap_nodes']);
+    final professorStatus = nodes.isEmpty
         ? ProgressStatus.notStarted
         : ProgressStatus.fromDatabase(
-            rawNodes.first['professor_status'] as String,
+            nodes.first['professor_status'] as String,
           );
 
-    final rawProgress =
-        (json['student_progress'] as List<dynamic>? ?? const [])
-            .cast<Map<String, dynamic>>();
-    final studentStatus = rawProgress.isEmpty
+    final progress = _asRowList(json['student_progress']);
+    final studentStatus = progress.isEmpty
         ? null
-        : ProgressStatus.fromDatabase(rawProgress.first['status'] as String);
+        : ProgressStatus.fromDatabase(progress.first['status'] as String);
 
     return RoadmapItem(
       id: json['id'] as String,
@@ -60,4 +58,16 @@ class RoadmapItem {
   final List<Topic> topics;
   final ProgressStatus professorStatus;
   final ProgressStatus? studentStatus;
+}
+
+/// Normalizes an embedded PostgREST field into a list of maps, regardless of
+/// whether the server returned it as a list or as a single object (which can
+/// happen on 1-to-1 relationships with a unique constraint).
+List<Map<String, dynamic>> _asRowList(Object? value) {
+  if (value == null) return const [];
+  if (value is Map<String, dynamic>) return [value];
+  if (value is List) {
+    return value.whereType<Map<String, dynamic>>().toList(growable: false);
+  }
+  return const [];
 }

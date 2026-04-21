@@ -4,9 +4,11 @@ import '../../app/theme/tokens.dart';
 
 /// AI-extracted topic label. Sits under a module item on the roadmap.
 ///
-/// Uses the active role's primary color as a subtle left-edge accent so
+/// Uses the active role's primary color as a small left-side dot so
 /// admin/professor/student views can host the same chips and still feel
-/// distinct from one another.
+/// distinct from one another. Per-side border colors aren't used because
+/// Flutter's DecoratedBox requires uniform border colors whenever a
+/// borderRadius is applied.
 class TopicChip extends StatelessWidget {
   const TopicChip({required this.label, this.confidence, super.key});
 
@@ -18,31 +20,38 @@ class TopicChip extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return DecoratedBox(
+    return Container(
       decoration: BoxDecoration(
-        color: colors.primaryContainer.withValues(alpha: 0.35),
+        color: colors.primaryContainer.withValues(alpha: 0.4),
         borderRadius: Radii.pill,
-        border: Border(
-          left: BorderSide(color: colors.primary, width: 2),
-          top: BorderSide(color: colors.outline, width: 0.5),
-          right: BorderSide(color: colors.outline, width: 0.5),
-          bottom: BorderSide(color: colors.outline, width: 0.5),
-        ),
+        border: Border.all(color: colors.outline, width: 0.5),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          Spacing.md,
-          Spacing.xs + 1,
-          Spacing.md,
-          Spacing.xs + 1,
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: colors.onPrimaryContainer,
-            letterSpacing: 0.1,
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.sm,
+        Spacing.xs + 1,
+        Spacing.md,
+        Spacing.xs + 1,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: colors.primary,
+              shape: BoxShape.circle,
+            ),
           ),
-        ),
+          const SizedBox(width: Spacing.xs + 2),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colors.onPrimaryContainer,
+              letterSpacing: 0.1,
+            ),
+          ),
+        ],
       ),
     );
   }

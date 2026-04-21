@@ -21,6 +21,16 @@ ThemeData buildAppTheme(RoleTheme role) {
     textTheme: textTheme,
     primaryTextTheme: textTheme,
     splashFactory: InkSparkle.splashFactory,
+    // Android's default ZoomPageTransitionsBuilder feels heavy when the
+    // destination screen renders a loading skeleton mid-animation. Using
+    // Cupertino's horizontal slide gives a calmer transition on both
+    // platforms without importing Cupertino widgets elsewhere.
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
     appBarTheme: AppBarTheme(
       centerTitle: false,
       backgroundColor: Palette.paper,

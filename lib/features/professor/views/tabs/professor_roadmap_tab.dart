@@ -9,10 +9,11 @@ import '../../../../core/widgets/status_pill.dart';
 import '../../../../data/repositories/roadmap_repository.dart';
 import '../../../roadmap/controllers/roadmap_providers.dart';
 import '../../../roadmap/models/roadmap_module.dart';
-import '../../../roadmap/views/widgets/roadmap_module_section.dart';
+import '../../../roadmap/views/widgets/roadmap_timeline.dart';
 
-/// Professor roadmap view — grouped by module, items underneath with
-/// extracted topics and a coverage picker per item.
+/// Professor roadmap view — timeline tree: one spine running through the
+/// whole section, module nodes branching off, items hanging below each
+/// module, each item showing extracted topics and a tappable coverage picker.
 class ProfessorRoadmapTab extends ConsumerWidget {
   const ProfessorRoadmapTab({required this.sectionId, super.key});
 
@@ -24,10 +25,9 @@ class ProfessorRoadmapTab extends ConsumerWidget {
 
     Future<void> changeStatus(String itemId, ProgressStatus status) async {
       try {
-        await ref.read(roadmapRepositoryProvider).updateProfessorStatus(
-              moduleItemId: itemId,
-              status: status,
-            );
+        await ref
+            .read(roadmapRepositoryProvider)
+            .updateProfessorStatus(moduleItemId: itemId, status: status);
         ref.invalidate(professorRoadmapProvider(sectionId));
       } catch (e) {
         if (!context.mounted) return;
@@ -64,15 +64,12 @@ class ProfessorRoadmapTab extends ConsumerWidget {
                 ],
               );
             }
-            return ListView.separated(
+            return SingleChildScrollView(
               padding: Spacing.screenPadding,
-              itemCount: modules.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: Spacing.xxl),
-              itemBuilder: (_, i) => RoadmapModuleSection(
-                module: modules[i],
-                onProfessorStatusChanged: (itemId, status) =>
-                    changeStatus(itemId, status as ProgressStatus),
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: RoadmapTimeline(
+                modules: modules,
+                onProfessorStatusChanged: changeStatus,
               ),
             );
           },

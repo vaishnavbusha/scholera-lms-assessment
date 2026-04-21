@@ -9,6 +9,7 @@ import '../../auth/models/app_role.dart';
 import '../../courses/models/course_section.dart';
 import '../controllers/professor_providers.dart';
 import 'tabs/announcements_tab.dart';
+import 'tabs/modules_tab.dart';
 
 /// Professor's course management shell. Three tabs (Announcements, Modules,
 /// Roadmap) mirror the rubric's course management structure. Each tab owns
@@ -75,16 +76,11 @@ class _ProfessorCourseScreenState extends ConsumerState<ProfessorCourseScreen>
               controller: _tabController,
               children: [
                 AnnouncementsTab(sectionId: widget.sectionId),
+                ModulesTab(sectionId: widget.sectionId),
                 const _ComingSoon(
-                  title: 'Modules land next',
+                  title: 'Roadmap lands next',
                   message:
-                      'Module management (create modules, add link/note/file items) is the next slice of the professor experience.',
-                  icon: Icons.folder_outlined,
-                ),
-                const _ComingSoon(
-                  title: 'Roadmap lands after modules',
-                  message:
-                      'Once modules exist, the roadmap auto-populates with items, topics, and coverage status you can toggle.',
+                      'Now that modules exist, the roadmap view with extracted topics and coverage status is the final piece of the professor experience.',
                   icon: Icons.timeline_outlined,
                 ),
               ],

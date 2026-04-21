@@ -15,6 +15,7 @@
 - Phase 3 shared UI system complete (2026-04-19): "studio light" design thesis — single-family **Plus Jakarta Sans** typography, cool neutral canvas (#F6F7F9), saturated role accents (admin cobalt #1D4ED8, professor amber #D97706, student emerald #059669), slate-family ink. Tokens, role theme, and eight reusable primitives (`ScholeraScaffold`, `AsyncContent`, `EmptyState`, `ErrorState`, `LoadingSkeleton`, `StatusPill`, `TopicChip`, `RoleBadge`) live under `lib/app/theme/` and `lib/core/widgets/`. Each role shell wraps itself in `RoleThemeScope` — primitives take no role parameter. Earlier "academic workshop" palette (warm cream + Fraunces serif) was discarded because the cream canvas felt derivative.
 - Phase 4 admin experience complete (2026-04-19): stats dashboard + departments list merged on `AdminHomeScreen`, `DepartmentDetailScreen` and `ProfessorDetailScreen` as drill-downs. `AdminRepository` + Riverpod `FutureProvider` family handle the four queries. Pull-to-refresh on every admin screen. All data live from Supabase — no fixtures.
 - Phase 5a-5c professor experience (partial) complete (2026-04-19): `ProfessorCoursesScreen` lists sections the professor teaches; `ProfessorCourseScreen` is a tabbed shell (Announcements / Modules / Roadmap); Announcements tab is fully functional with list + `CreateAnnouncementSheet` (modal bottom sheet). Remaining: modules + roadmap.
+- Phase 5d-5e professor modules complete (2026-04-20): `ModulesTab` lists modules with nested items (type-iconed rows); `CreateModuleSheet` creates a module with auto-incrementing position; `CreateModuleItemSheet` adds a link / note / file item. File uploads use `file_picker` 11 and store to `course-content/{sectionId}/{timestamp}_{filename}` per the storage path convention. Cleanup on row-insert failure.
 
 ## Active Decisions
 
@@ -91,11 +92,11 @@
 - [x] Course management tabs (Announcements / Modules / Roadmap).
 - [x] Announcements list (newest first, with timestamps).
 - [x] Create announcement (modal bottom sheet; auto-refresh on success).
-- [ ] Modules list.
-- [ ] Create module.
-- [ ] Add link item.
-- [ ] Add note item.
-- [ ] Upload PDF/PPT item.
+- [x] Modules list.
+- [x] Create module.
+- [x] Add link item.
+- [x] Add note item.
+- [x] Upload PDF/PPT item.
 - [ ] Professor roadmap with topics.
 - [ ] Update professor coverage status.
 

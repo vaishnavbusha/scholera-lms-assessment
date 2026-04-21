@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+
+import '../../../../app/theme/tokens.dart';
+import '../../../modules/models/module_item.dart';
+
+/// A single module item row. Compact: type icon + title + subtitle with
+/// type label, URL host, or file name.
+class ModuleItemRow extends StatelessWidget {
+  const ModuleItemRow({required this.item, super.key});
+
+  final ModuleItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final type = item.type;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              borderRadius: Radii.button,
+            ),
+            child: Icon(type.icon, color: colors.onPrimaryContainer, size: 18),
+          ),
+          const SizedBox(width: Spacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.title, style: theme.textTheme.titleMedium),
+                const SizedBox(height: 2),
+                Text(
+                  _subtitle(item),
+                  style: theme.textTheme.bodySmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _subtitle(ModuleItem item) {
+    if (item.url != null && item.url!.isNotEmpty) {
+      final host = Uri.tryParse(item.url!)?.host;
+      return '${item.type.label} \u00b7 ${host ?? item.url}';
+    }
+    if (item.storagePath != null && item.storagePath!.isNotEmpty) {
+      final segments = item.storagePath!.split('/');
+      return '${item.type.label} \u00b7 ${segments.last}';
+    }
+    if (item.body != null && item.body!.isNotEmpty) {
+      return '${item.type.label} \u00b7 ${item.body}';
+    }
+    return item.type.label;
+  }
+}

@@ -129,20 +129,6 @@ class ModuleRepository {
     }
   }
 
-  /// Generates a short-lived signed URL for a file stored under
-  /// [storagePath] (e.g. `course-content/{sectionId}/lecture.pdf`).
-  /// The bucket is private so downloads need a signed URL rather than a
-  /// public link.
-  Future<String> createSignedUrlFor(String storagePath) async {
-    if (!storagePath.startsWith('$_bucket/')) {
-      throw ArgumentError(
-        'Storage path must start with "$_bucket/": $storagePath',
-      );
-    }
-    final objectPath = storagePath.substring(_bucket.length + 1);
-    return _client.storage.from(_bucket).createSignedUrl(objectPath, 60 * 10);
-  }
-
   String _sanitizeFileName(String name) {
     return name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
   }

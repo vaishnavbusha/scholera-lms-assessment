@@ -39,6 +39,9 @@ migrate_working_dir/
 # Local-only handoff notes (not part of the submission)
 HANDOFF.md
 
+# Claude Code local agent state
+.claude/
+
 # Symbolication related
 app.*.symbols
 

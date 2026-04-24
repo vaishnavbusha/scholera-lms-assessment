@@ -36,6 +36,9 @@ migrate_working_dir/
 .env.*
 !.env.example
 
+# Local-only handoff notes (not part of the submission)
+HANDOFF.md
+
 # Symbolication related
 app.*.symbols
 

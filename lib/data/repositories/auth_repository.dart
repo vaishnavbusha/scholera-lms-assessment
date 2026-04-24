@@ -14,6 +14,8 @@ class AuthRepository {
 
   Session? get currentSession => _client.auth.currentSession;
 
+  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
+
   Future<AuthResponse> signInWithPassword({
     required String email,
     required String password,

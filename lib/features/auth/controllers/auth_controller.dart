@@ -19,6 +19,19 @@ class AuthController extends AsyncNotifier<AuthSessionState> {
     }
 
     final authRepository = ref.watch(authRepositoryProvider);
+
+    // Supabase fires `signedOut` both for explicit sign-outs and when a
+    // refresh-token attempt fails (revoked session, expired past the
+    // refresh window). Reacting here lets the router redirect to login
+    // instead of leaving the user on a dead authenticated shell.
+    final subscription = authRepository.authStateChanges.listen((event) {
+      if (event.event == AuthChangeEvent.signedOut &&
+          (state.value?.isAuthenticated ?? false)) {
+        state = const AsyncData(AuthSessionState.signedOut());
+      }
+    });
+    ref.onDispose(subscription.cancel);
+
     final session = authRepository.currentSession;
 
     if (session == null) {

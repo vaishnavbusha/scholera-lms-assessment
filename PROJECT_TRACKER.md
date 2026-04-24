@@ -18,6 +18,9 @@
 - Phase 5d-5e professor modules complete (2026-04-20): `ModulesTab` lists modules with nested items (type-iconed rows); `CreateModuleSheet` creates a module with auto-incrementing position; `CreateModuleItemSheet` adds a link / note / file item. File uploads use `file_picker` 11 and store to `course-content/{sectionId}/{timestamp}_{filename}` per the storage path convention. Cleanup on row-insert failure.
 - Phase 5f professor roadmap complete (2026-04-20): `ProfessorRoadmapTab` groups modules with items underneath; each item shows extracted topics as `TopicChip`s and a tappable coverage-status picker that updates `roadmap_nodes.professor_status` through `RoadmapRepository`. Shared `RoadmapItemCard` and `RoadmapStatusPicker` widgets so the student roadmap reuses them. Later rebuilt the section layout into a timeline-tree (`RoadmapTimeline`): continuous vertical spine, module nodes, item nodes hanging below.
 - Phase 6 student experience complete (2026-04-20): `StudentCoursesScreen` lists enrolled sections; `StudentCourseScreen` is a tabbed shell matching the professor's three-tab layout with emerald accent. `StudentAnnouncementsTab` is read-only with tap-to-open `AnnouncementDetailScreen` (also positioned as the deep-link target). `StudentModulesTab` is read-only. `StudentRoadmapTab` reuses `RoadmapTimeline` with a tappable "You:" picker that upserts `student_progress`, professor coverage shown as a read-only pill next to it.
+- Phase 7 profile + deep links complete (2026-04-22): shared `ProfileScreen` across roles with avatar upload to `avatars/{userId}/...`, editable display name + bio, and sign-out. `scholera://courses/{sectionId}/announcements/{announcementId}` deep links handled via `app_links`; `DeepLinkController` holds pre-auth URIs and the router consumes them after sign-in.
+- Expired-session handling added (2026-04-24): `AuthController.build()` subscribes to `onAuthStateChange` and flips state to `signedOut` when Supabase emits `AuthChangeEvent.signedOut` (covers both explicit sign-outs and refresh-token failures). Router's `refreshListenable` picks up the transition and redirects to `/login`.
+- Doc drift resolved (2026-04-24): empty / loading / error states were already implemented across all 18 async surfaces via `AsyncContent` + `EmptyState` + `ErrorState` primitives; tracker just hadn't been ticked. `HANDOFF.md` is now a local-only working note (gitignored).
 
 ## Active Decisions
 
@@ -77,7 +80,7 @@
 - [x] Session restore.
 - [x] Profile role fetch.
 - [x] Role-based route redirect.
-- [ ] Expired session handling.
+- [x] Expired session handling.
 - [x] Sign-out from each role.
 
 ### Admin
@@ -127,10 +130,10 @@
 
 ### Polish
 
-- [ ] Empty states.
-- [ ] Loading skeletons.
-- [ ] Friendly error states.
-- [ ] Pull-to-refresh on key lists.
+- [x] Empty states (`EmptyState` primitive wired into every list/tab).
+- [x] Loading skeletons (`LoadingSkeleton` + `AsyncContent` on every async surface).
+- [x] Friendly error states (`ErrorState` with retry on every async surface).
+- [x] Pull-to-refresh on key lists (admin home + detail screens; student/professor course lists).
 - [ ] Optimistic updates where appropriate.
 - [ ] Accessibility labels for controls.
 - [ ] Performance pass on large lists.
@@ -181,7 +184,7 @@
 
 ## Next Best Action
 
-All required features from the rubric are implemented (auth, role routing, admin / professor / student experiences, profile, deep linking). Remaining work is submission polish: README with setup + demo credentials + screenshots + known issues, user-authored `AI_ASSISTANT_USAGE.md`, a 5-10 minute demo video, and an expired-session smoke test.
+All required features from the rubric are implemented (auth with expired-session handling, role routing, admin / professor / student experiences, profile, deep linking, empty / loading / error states). Remaining work is submission polish: README with setup + demo credentials + screenshots + known issues, user-authored `AI_ASSISTANT_USAGE.md`, and a 5-10 minute demo video.
 
 ## Commit Checkpoints
 

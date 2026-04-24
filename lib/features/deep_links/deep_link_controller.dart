@@ -41,6 +41,13 @@ class DeepLinkController extends Notifier<Uri?> {
   void consume() {
     state = null;
   }
+
+  /// Inject a deep link from a non-OS source (e.g. tapping a local
+  /// notification). Takes the same path as an OS-originated scholera:// URI
+  /// so the router handles both identically — replay after auth included.
+  void receive(Uri uri) {
+    state = uri;
+  }
 }
 
 /// Maps a recognised `scholera://` deep link to the corresponding in-app

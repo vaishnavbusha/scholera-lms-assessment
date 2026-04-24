@@ -16,6 +16,7 @@ class RoadmapItem {
     required this.topics,
     required this.professorStatus,
     this.studentStatus,
+    this.storagePath,
   });
 
   factory RoadmapItem.fromJson(Map<String, dynamic> json) {
@@ -46,6 +47,7 @@ class RoadmapItem {
       topics: topics,
       professorStatus: professorStatus,
       studentStatus: studentStatus,
+      storagePath: json['storage_path'] as String?,
     );
   }
 
@@ -58,6 +60,25 @@ class RoadmapItem {
   final List<Topic> topics;
   final ProgressStatus professorStatus;
   final ProgressStatus? studentStatus;
+  final String? storagePath;
+
+  RoadmapItem copyWith({
+    ProgressStatus? professorStatus,
+    ProgressStatus? studentStatus,
+  }) {
+    return RoadmapItem(
+      id: id,
+      moduleId: moduleId,
+      sectionId: sectionId,
+      title: title,
+      type: type,
+      position: position,
+      topics: topics,
+      professorStatus: professorStatus ?? this.professorStatus,
+      studentStatus: studentStatus ?? this.studentStatus,
+      storagePath: storagePath,
+    );
+  }
 }
 
 /// Normalizes an embedded PostgREST field into a list of maps, regardless of

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/tokens.dart';
 import '../../../../core/widgets/async_content.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/loading_skeleton.dart';
 import '../../../announcements/controllers/announcement_providers.dart';
 import '../../../announcements/models/announcement.dart';
@@ -52,14 +53,17 @@ class StudentAnnouncementsTab extends ConsumerWidget {
             separatorBuilder: (_, __) => const SizedBox(height: Spacing.md),
             itemBuilder: (_, i) {
               final announcement = list[i];
-              return AnnouncementCard(
-                announcement: announcement,
-                onTap: () => context.pushNamed(
-                  AnnouncementDetailScreen.routeName,
-                  pathParameters: {
-                    'sectionId': sectionId,
-                    'announcementId': announcement.id,
-                  },
+              return FadeSlideIn(
+                index: i,
+                child: AnnouncementCard(
+                  announcement: announcement,
+                  onTap: () => context.pushNamed(
+                    AnnouncementDetailScreen.routeName,
+                    pathParameters: {
+                      'sectionId': sectionId,
+                      'announcementId': announcement.id,
+                    },
+                  ),
                 ),
               );
             },

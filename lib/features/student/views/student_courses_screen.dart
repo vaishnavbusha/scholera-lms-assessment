@@ -6,6 +6,7 @@ import '../../../app/theme/role_theme_scope.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/widgets/async_content.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/fade_slide_in.dart';
 import '../../../core/widgets/loading_skeleton.dart';
 import '../../../core/widgets/scholera_scaffold.dart';
 import '../../auth/models/app_role.dart';
@@ -63,11 +64,14 @@ class StudentCoursesScreen extends ConsumerWidget {
                     const SizedBox(height: Spacing.md),
                 itemBuilder: (_, i) {
                   final section = list[i];
-                  return CourseSectionTile(
-                    section: section,
-                    onTap: () => context.pushNamed(
-                      StudentCourseScreen.routeName,
-                      pathParameters: {'sectionId': section.id},
+                  return FadeSlideIn(
+                    index: i,
+                    child: CourseSectionTile(
+                      section: section,
+                      onTap: () => context.pushNamed(
+                        StudentCourseScreen.routeName,
+                        pathParameters: {'sectionId': section.id},
+                      ),
                     ),
                   );
                 },

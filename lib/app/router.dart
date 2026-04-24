@@ -1,12 +1,15 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/biometric/biometric_controller.dart';
 import '../features/admin/views/admin_home_screen.dart';
 import '../features/admin/views/department_detail_screen.dart';
 import '../features/admin/views/professor_detail_screen.dart';
 import '../features/auth/controllers/auth_controller.dart';
 import '../features/auth/views/login_screen.dart';
+import '../features/auth/views/splash_screen.dart';
+import '../features/auth/views/unlock_screen.dart';
 import '../features/auth/models/app_role.dart';
 import '../features/deep_links/deep_link_controller.dart';
 import '../features/profile/views/profile_screen.dart';
@@ -15,6 +18,12 @@ import '../features/professor/views/professor_courses_screen.dart';
 import '../features/student/views/announcement_detail_screen.dart';
 import '../features/student/views/student_course_screen.dart';
 import '../features/student/views/student_courses_screen.dart';
+
+/// Global key for the root Navigator. Exposed so things living above the
+/// router (MaterialApp.router's builder, in particular) can still push
+/// dialogs — showDialog needs a BuildContext with a Navigator ancestor, and
+/// the builder context doesn't have one.
+final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 /// The app's [GoRouter]. Created once per app lifetime.
 ///
@@ -34,14 +43,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.onDispose(refreshListenable.dispose);
 
   return GoRouter(
-    initialLocation: LoginScreen.routePath,
+    navigatorKey: rootNavigatorKey,
+    initialLocation: SplashScreen.routePath,
     refreshListenable: refreshListenable,
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
       final sessionState = authState.value;
       final pendingLink = ref.read(deepLinkControllerProvider);
-      final isLoggingIn = state.matchedLocation == LoginScreen.routePath;
+      final biometric = ref.read(biometricControllerProvider).value;
+      final location = state.matchedLocation;
+      final isSplashing = location == SplashScreen.routePath;
+      final isLoggingIn = location == LoginScreen.routePath;
+      final isUnlocking = location == UnlockScreen.routePath;
 
+      // Auth init failed (network, deleted profile, unexpected role, etc.).
+      // Don't leave the user stuck on splash — route to login so they can
+      // at least sign out or try again with different credentials.
+      if (authState.hasError) {
+        return isLoggingIn ? null : LoginScreen.routePath;
+      }
+
+      // Still resolving auth on cold start. Keep the user on splash so
+      // they see a branded neutral state instead of a flash of login.
       if (authState.isLoading || sessionState == null) {
         return null;
       }
@@ -56,6 +79,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return isLoggingIn ? null : LoginScreen.routePath;
       }
 
+      // Biometric gate: signed in but still locked for this launch. Hold
+      // the user on /unlock until they authenticate or sign out.
+      if (biometric?.gate == BiometricGateState.locked) {
+        return isUnlocking ? null : UnlockScreen.routePath;
+      }
+
       // Authenticated: if there's a pending deep link that resolves to an
       // in-app path, consume it and route there.
       if (pendingLink != null) {
@@ -64,7 +93,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (target != null) return target;
       }
 
-      if (isLoggingIn) {
+      if (isSplashing || isLoggingIn || isUnlocking) {
         return _homePathForRole(sessionState.profile!.role);
       }
 
@@ -72,9 +101,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(
+        path: SplashScreen.routePath,
+        name: SplashScreen.routeName,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
         path: LoginScreen.routePath,
         name: LoginScreen.routeName,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: UnlockScreen.routePath,
+        name: UnlockScreen.routeName,
+        builder: (context, state) => const UnlockScreen(),
       ),
       GoRoute(
         path: ProfileScreen.routePath,
@@ -167,15 +206,22 @@ class _RouterRefreshNotifier extends ChangeNotifier {
       (_, __) => notifyListeners(),
       fireImmediately: false,
     );
+    _biometricSub = ref.listen<Object?>(
+      biometricControllerProvider,
+      (_, __) => notifyListeners(),
+      fireImmediately: false,
+    );
   }
 
   late final ProviderSubscription<Object?> _authSub;
   late final ProviderSubscription<Object?> _deepLinkSub;
+  late final ProviderSubscription<Object?> _biometricSub;
 
   @override
   void dispose() {
     _authSub.close();
     _deepLinkSub.close();
+    _biometricSub.close();
     super.dispose();
   }
 }

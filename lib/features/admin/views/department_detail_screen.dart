@@ -6,6 +6,7 @@ import '../../../app/theme/role_theme_scope.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/widgets/async_content.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/loading_skeleton.dart';
 import '../../../core/widgets/scholera_scaffold.dart';
 import '../../auth/models/app_role.dart';
 import '../controllers/admin_providers.dart';
@@ -24,28 +25,31 @@ class DepartmentDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(departmentDetailProvider(departmentId));
 
+    // Keep the scaffold stable through loading/data/error so the app bar
+    // doesn't pop in when data arrives. The body swaps inside a fading
+    // AsyncContent so the skeleton → data transition is smooth.
     return RoleThemeScope.forAppRole(
       role: AppRole.admin,
-      child: AsyncContent(
-        value: detail,
-        errorTitle: 'Couldn\u2019t load department',
-        onRetry: () => ref.invalidate(departmentDetailProvider(departmentId)),
-        data: (data) {
-          final dept = data.department;
-          final professors = data.professors;
+      child: ScholeraScaffold.custom(
+        title: detail.value?.department.name ?? 'Department',
+        subtitle: 'Department',
+        showRoleBadge: true,
+        body: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(departmentDetailProvider(departmentId));
+            await ref.read(departmentDetailProvider(departmentId).future);
+          },
+          child: AsyncContent(
+            value: detail,
+            errorTitle: 'Couldn\u2019t load department',
+            onRetry: () =>
+                ref.invalidate(departmentDetailProvider(departmentId)),
+            loading: (_) => const _DepartmentSkeleton(),
+            data: (data) {
+              final dept = data.department;
+              final professors = data.professors;
 
-          return ScholeraScaffold.custom(
-            title: dept.name,
-            subtitle: 'Department',
-            showRoleBadge: true,
-            body: RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(departmentDetailProvider(departmentId));
-                await ref.read(
-                  departmentDetailProvider(departmentId).future,
-                );
-              },
-              child: ListView(
+              return ListView(
                 padding: Spacing.screenPadding,
                 children: [
                   if (dept.description != null &&
@@ -91,10 +95,10 @@ class DepartmentDetailScreen extends ConsumerWidget {
                     ),
                   const SizedBox(height: Spacing.xxl),
                 ],
-              ),
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -108,5 +112,64 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(title, style: Theme.of(context).textTheme.titleLarge);
+  }
+}
+
+/// Matches the real layout's footprint: description bars, section header,
+/// three professor-row-shaped cards. Keeps skeleton → data swap from
+/// visually jumping.
+class _DepartmentSkeleton extends StatelessWidget {
+  const _DepartmentSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: Spacing.screenPadding,
+      children: const [
+        LoadingSkeletonBar(width: double.infinity, height: 14),
+        SizedBox(height: Spacing.xs),
+        LoadingSkeletonBar(width: 220, height: 14),
+        SizedBox(height: Spacing.xl),
+        LoadingSkeletonBar(width: 140, height: 20),
+        SizedBox(height: Spacing.md),
+        _ProfessorRowSkeleton(),
+        SizedBox(height: Spacing.md),
+        _ProfessorRowSkeleton(),
+        SizedBox(height: Spacing.md),
+        _ProfessorRowSkeleton(),
+      ],
+    );
+  }
+}
+
+class _ProfessorRowSkeleton extends StatelessWidget {
+  const _ProfessorRowSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(Spacing.lg),
+      decoration: BoxDecoration(
+        borderRadius: Radii.card,
+        border: Border.all(color: colors.outline),
+      ),
+      child: Row(
+        children: const [
+          LoadingSkeletonBar(width: 44, height: 44, radius: 22),
+          SizedBox(width: Spacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LoadingSkeletonBar(width: 160, height: 14),
+                SizedBox(height: Spacing.xs),
+                LoadingSkeletonBar(width: 220, height: 12),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

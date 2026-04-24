@@ -136,3 +136,22 @@ These credentials exist only in the throwaway demo Supabase project. Do not reus
 If `SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing, the app shows a setup-needed message on the sign-in screen and disables sign-in.
 
 Once the project URL and anon key are passed in, the app initializes Supabase and sign-in can call the real Supabase Auth API.
+
+## 9. Realtime Publication (for live announcements)
+
+`schema.sql` adds `public.announcements` to the `supabase_realtime` publication at the bottom of the file. After running the script, verify in **Database → Replication → `supabase_realtime`** that `announcements` is checked. Without this, live announcement delivery and the local-notification stretch goal won't fire.
+
+## 10. Gemini API Key (optional, for Lecture Insights)
+
+Lecture insights (AI-generated summary + topics on file items in the roadmap) require a Gemini API key. Get one for free at <https://aistudio.google.com>.
+
+Pass it as a dart-define alongside the Supabase values:
+
+```sh
+flutter run \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=GEMINI_API_KEY=your-gemini-key
+```
+
+If `GEMINI_API_KEY` is missing, the insights sheet falls back to showing the file name and the topics that were pre-extracted into `public.topics` — still useful, just no AI summary.

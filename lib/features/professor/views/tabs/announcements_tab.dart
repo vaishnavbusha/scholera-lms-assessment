@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/tokens.dart';
 import '../../../../core/widgets/async_content.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/loading_skeleton.dart';
 import '../../../announcements/controllers/announcement_providers.dart';
 import '../../../announcements/models/announcement.dart';
@@ -58,7 +59,10 @@ class AnnouncementsTab extends ConsumerWidget {
               itemCount: list.length,
               separatorBuilder: (_, __) =>
                   const SizedBox(height: Spacing.md),
-              itemBuilder: (_, i) => AnnouncementCard(announcement: list[i]),
+              itemBuilder: (_, i) => FadeSlideIn(
+                index: i,
+                child: AnnouncementCard(announcement: list[i]),
+              ),
             );
           },
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/tokens.dart';
+import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../models/roadmap_item.dart';
 import '../../models/roadmap_module.dart';
@@ -40,16 +41,26 @@ class RoadmapTimeline extends StatelessWidget {
     final entries = _flatten();
     if (entries.isEmpty) return const SizedBox.shrink();
 
+    // Draw-in effect: each row (module header or item card) slides in from
+    // slightly left of the spine, staggered so the timeline appears to be
+    // traced out top to bottom. Capped at 12 rows of stagger so a long
+    // section doesn't take forever to settle.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < entries.length; i++)
-          _TimelineRow(
-            entry: entries[i],
-            isFirst: i == 0,
-            isLast: i == entries.length - 1,
-            onProfessorStatusChanged: onProfessorStatusChanged,
-            onStudentStatusChanged: onStudentStatusChanged,
+          FadeSlideIn(
+            index: i,
+            maxStaggerIndex: 12,
+            staggerStep: const Duration(milliseconds: 70),
+            initialOffset: const Offset(-0.08, 0),
+            child: _TimelineRow(
+              entry: entries[i],
+              isFirst: i == 0,
+              isLast: i == entries.length - 1,
+              onProfessorStatusChanged: onProfessorStatusChanged,
+              onStudentStatusChanged: onStudentStatusChanged,
+            ),
           ),
       ],
     );

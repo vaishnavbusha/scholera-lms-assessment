@@ -613,3 +613,29 @@ using (
   bucket_id = 'course-content'
   and public.teaches_section(((storage.foldername(name))[1])::uuid)
 );
+
+-- ---------------------------------------------------------------------------
+-- Realtime: enable change broadcasts on announcements so the mobile client
+-- can subscribe to inserts via supabase_flutter's postgres_changes channel,
+-- refresh the list without pull-to-refresh, and fire local notifications
+-- on new posts.
+--
+-- Idempotent via exception handling: running this block multiple times is
+-- safe. If Realtime isn't firing, re-run just this block and then verify
+-- with:
+--   select pubname, tablename from pg_publication_tables
+--   where tablename = 'announcements';
+-- A row with pubname = 'supabase_realtime' means the mobile app will
+-- receive insert/update/delete events scoped by RLS.
+-- ---------------------------------------------------------------------------
+
+do $$
+begin
+  alter publication supabase_realtime add table public.announcements;
+  raise notice 'Added public.announcements to supabase_realtime publication.';
+exception
+  when duplicate_object then
+    raise notice 'public.announcements is already in supabase_realtime — no change.';
+  when undefined_object then
+    raise warning 'Publication supabase_realtime not found. Realtime features will not work until it is created.';
+end$$;

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/role_theme_scope.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/widgets/async_content.dart';
+import '../../../core/widgets/course_shell_skeleton.dart';
 import '../../auth/models/app_role.dart';
 import '../../courses/models/course_section.dart';
 import '../controllers/student_providers.dart';
@@ -52,6 +53,7 @@ class _StudentCourseScreenState extends ConsumerState<StudentCourseScreen>
       child: AsyncContent<CourseSection>(
         value: section,
         errorTitle: 'Couldn\u2019t load this course',
+        loading: (_) => const CourseShellSkeleton(),
         onRetry: () => ref.invalidate(
           studentCourseSectionProvider(widget.sectionId),
         ),

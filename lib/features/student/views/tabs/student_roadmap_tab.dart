@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/tokens.dart';
+import '../../../../core/errors/friendly_error.dart';
 import '../../../../core/widgets/async_content.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_skeleton.dart';
@@ -15,41 +16,67 @@ import '../../../roadmap/views/widgets/roadmap_timeline.dart';
 /// Student roadmap view — same timeline tree the professor sees, but the
 /// coverage pill is read-only and the student gets their own tappable
 /// "You:" picker that writes into `student_progress`.
-class StudentRoadmapTab extends ConsumerWidget {
+class StudentRoadmapTab extends ConsumerStatefulWidget {
   const StudentRoadmapTab({required this.sectionId, super.key});
 
   final String sectionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudentRoadmapTab> createState() => _StudentRoadmapTabState();
+}
+
+class _StudentRoadmapTabState extends ConsumerState<StudentRoadmapTab> {
+  /// Optimistic overrides for the student's own progress, keyed by
+  /// moduleItemId. Cleared on pull-to-refresh.
+  final Map<String, ProgressStatus> _overrides = {};
+
+  Future<void> _changeStatus(
+    StudentRoadmapKey key,
+    String itemId,
+    ProgressStatus status,
+  ) async {
+    final previous = _overrides[itemId];
+    setState(() => _overrides[itemId] = status);
+
+    try {
+      await ref.read(roadmapRepositoryProvider).upsertStudentStatus(
+            studentId: key.studentId,
+            moduleItemId: itemId,
+            status: status,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (previous == null) {
+          _overrides.remove(itemId);
+        } else {
+          _overrides[itemId] = previous;
+        }
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Couldn\u2019t save your progress: ${friendlyErrorMessage(e)}',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _refresh(StudentRoadmapKey key) async {
+    setState(_overrides.clear);
+    ref.invalidate(studentRoadmapProvider(key));
+    await ref.read(studentRoadmapProvider(key).future);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(currentProfileProvider);
-    final key = (sectionId: sectionId, studentId: profile.id);
+    final key = (sectionId: widget.sectionId, studentId: profile.id);
     final roadmap = ref.watch(studentRoadmapProvider(key));
 
-    Future<void> changeStudentStatus(
-      String itemId,
-      ProgressStatus status,
-    ) async {
-      try {
-        await ref.read(roadmapRepositoryProvider).upsertStudentStatus(
-              studentId: profile.id,
-              moduleItemId: itemId,
-              status: status,
-            );
-        ref.invalidate(studentRoadmapProvider(key));
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Couldn\u2019t save your progress: $e')),
-        );
-      }
-    }
-
     return RefreshIndicator(
-      onRefresh: () async {
-        ref.invalidate(studentRoadmapProvider(key));
-        await ref.read(studentRoadmapProvider(key).future);
-      },
+      onRefresh: () => _refresh(key),
       child: AsyncContent<List<RoadmapModule>>(
         value: roadmap,
         loading: (_) => const LoadingSkeletonList(count: 3),
@@ -69,16 +96,37 @@ class StudentRoadmapTab extends ConsumerWidget {
               ],
             );
           }
+          final view = _applyOverrides(modules);
           return SingleChildScrollView(
             padding: Spacing.screenPadding,
             physics: const AlwaysScrollableScrollPhysics(),
             child: RoadmapTimeline(
-              modules: modules,
-              onStudentStatusChanged: changeStudentStatus,
+              modules: view,
+              onStudentStatusChanged: (itemId, status) =>
+                  _changeStatus(key, itemId, status),
             ),
           );
         },
       ),
     );
+  }
+
+  List<RoadmapModule> _applyOverrides(List<RoadmapModule> modules) {
+    if (_overrides.isEmpty) return modules;
+    return [
+      for (final module in modules)
+        RoadmapModule(
+          id: module.id,
+          sectionId: module.sectionId,
+          title: module.title,
+          position: module.position,
+          items: [
+            for (final item in module.items)
+              _overrides.containsKey(item.id)
+                  ? item.copyWith(studentStatus: _overrides[item.id])
+                  : item,
+          ],
+        ),
+    ];
   }
 }

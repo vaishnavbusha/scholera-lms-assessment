@@ -48,10 +48,13 @@ class AnnouncementDetailScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.campaign_outlined,
-                    color: colors.primary,
-                    size: 16,
+                  Hero(
+                    tag: 'announcement-icon-${announcement.id}',
+                    child: Icon(
+                      Icons.campaign_outlined,
+                      color: colors.primary,
+                      size: 16,
+                    ),
                   ),
                   const SizedBox(width: Spacing.xs),
                   Text(

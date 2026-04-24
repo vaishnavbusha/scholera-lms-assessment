@@ -6,6 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/theme/role_theme_scope.dart';
 import '../../../app/theme/tokens.dart';
+import '../../../core/biometric/biometric_controller.dart';
+import '../../../core/errors/friendly_error.dart';
+import '../../../core/notifications/notification_preferences.dart';
+import '../../../core/widgets/fade_through_switcher.dart';
 import '../../../core/widgets/scholera_scaffold.dart';
 import '../../../data/repositories/profile_repository.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -32,7 +36,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _initialized = false;
   bool _savingFields = false;
   bool _uploadingAvatar = false;
-  String? _error;
 
   @override
   void initState() {
@@ -98,15 +101,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             enabled: !_savingFields,
             onChanged: (_) => setState(() {}),
           ),
-          if (_error != null) ...[
-            const SizedBox(height: Spacing.md),
-            Text(
-              _error!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-          ],
           const SizedBox(height: Spacing.xl),
           FilledButton(
             onPressed: (!isDirty || _savingFields) ? null : _saveFields,
@@ -120,6 +114,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   )
                 : const Text('Save changes'),
           ),
+          const SizedBox(height: Spacing.xl),
+          const _NotificationsToggle(),
+          const SizedBox(height: Spacing.md),
+          const _BiometricToggle(),
           const SizedBox(height: Spacing.md),
           OutlinedButton(
             onPressed: _savingFields
@@ -143,10 +141,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _saveFields() async {
     final profile = ref.read(currentProfileProvider);
-    setState(() {
-      _savingFields = true;
-      _error = null;
-    });
+    setState(() => _savingFields = true);
     try {
       await ref.read(profileRepositoryProvider).updateProfile(
             id: profile.id,
@@ -160,7 +155,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Couldn\u2019t save: ${friendlyErrorMessage(e)}'),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _savingFields = false);
     }
@@ -168,10 +167,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _pickAvatar() async {
     final profile = ref.read(currentProfileProvider);
-    setState(() {
-      _uploadingAvatar = true;
-      _error = null;
-    });
+    setState(() => _uploadingAvatar = true);
     try {
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
@@ -199,10 +195,186 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Couldn\u2019t update avatar: ${friendlyErrorMessage(e)}'),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _uploadingAvatar = false);
     }
+  }
+}
+
+class _NotificationsToggle extends ConsumerStatefulWidget {
+  const _NotificationsToggle();
+
+  @override
+  ConsumerState<_NotificationsToggle> createState() =>
+      _NotificationsToggleState();
+}
+
+class _NotificationsToggleState extends ConsumerState<_NotificationsToggle> {
+  /// Optimistic local override so the Switch doesn't flicker while the
+  /// prefs future re-resolves after a toggle.
+  bool? _override;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final profile = ref.watch(currentProfileProvider);
+    final prefsAsync = ref.watch(notificationPreferencesProvider);
+
+    return FadeThroughSwitcher(
+      child: prefsAsync.when(
+        loading: () => const SizedBox.shrink(
+          key: ValueKey('notifications-toggle-loading'),
+        ),
+        error: (_, __) => const SizedBox.shrink(
+          key: ValueKey('notifications-toggle-error'),
+        ),
+        data: (prefs) {
+          final enabled = _override ?? prefs.isEnabled(profile.id);
+          return Container(
+            key: const ValueKey('notifications-toggle-data'),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg,
+              vertical: Spacing.sm,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: Radii.card,
+              border: Border.all(color: colors.outline),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.notifications_outlined,
+                  color: colors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: Spacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Announcement notifications',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        enabled
+                            ? 'On when your professor posts a new announcement.'
+                            : 'Muted. You\u2019ll still see new posts in-app.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: enabled,
+                  onChanged: (value) async {
+                    setState(() => _override = value);
+                    await prefs.setEnabled(profile.id, value);
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _BiometricToggle extends ConsumerWidget {
+  const _BiometricToggle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final biometric = ref.watch(biometricControllerProvider);
+
+    return FadeThroughSwitcher(
+      child: biometric.when(
+        loading: () => const SizedBox.shrink(
+          key: ValueKey('biometric-toggle-loading'),
+        ),
+        error: (_, __) => const SizedBox.shrink(
+          key: ValueKey('biometric-toggle-error'),
+        ),
+        data: (runtime) {
+          if (!runtime.deviceAvailable) {
+            return const SizedBox.shrink(
+              key: ValueKey('biometric-toggle-unavailable'),
+            );
+          }
+
+          final enabled = runtime.enrolledForCurrentUser;
+          return Container(
+            key: const ValueKey('biometric-toggle-data'),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg,
+              vertical: Spacing.sm,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: Radii.card,
+              border: Border.all(color: colors.outline),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.fingerprint, color: colors.primary, size: 20),
+                const SizedBox(width: Spacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Biometric unlock',
+                          style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 2),
+                      Text(
+                        enabled
+                            ? 'Required on next launch.'
+                            : 'Unlock with Face ID / fingerprint on next launch.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: enabled,
+                  onChanged: (value) async {
+                    final controller = ref.read(
+                      biometricControllerProvider.notifier,
+                    );
+                    if (value) {
+                      final ok = await controller.enableForCurrentUser();
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Couldn\u2019t enable biometric unlock.',
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      await controller.disableForCurrentUser();
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 

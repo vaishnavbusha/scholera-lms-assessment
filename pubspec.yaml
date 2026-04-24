@@ -44,6 +44,11 @@ dependencies:
   shimmer: ^3.0.0
   google_fonts: ^6.3.2
   app_links: ^6.3.3
+  flutter_local_notifications: ^19.4.2
+  local_auth: ^2.3.0
+  shared_preferences: ^2.3.3
+  google_generative_ai: ^0.4.6
+  refresh_rate: ^1.0.1
 
 dev_dependencies:
   flutter_test:

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../app/env.dart';
 import '../../../app/theme/palette.dart';
 import '../../../app/theme/tokens.dart';
+import '../../../core/errors/friendly_error.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -77,7 +78,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: Spacing.lg),
                       ],
                       if (authState.hasError) ...[
-                        _AuthErrorNotice(message: authState.error.toString()),
+                        _AuthErrorNotice(
+                          message: friendlyErrorMessage(authState.error!),
+                        ),
                         const SizedBox(height: Spacing.md),
                       ],
                       Form(

@@ -21,6 +21,13 @@
 - Phase 7 profile + deep links complete (2026-04-22): shared `ProfileScreen` across roles with avatar upload to `avatars/{userId}/...`, editable display name + bio, and sign-out. `scholera://courses/{sectionId}/announcements/{announcementId}` deep links handled via `app_links`; `DeepLinkController` holds pre-auth URIs and the router consumes them after sign-in.
 - Expired-session handling added (2026-04-24): `AuthController.build()` subscribes to `onAuthStateChange` and flips state to `signedOut` when Supabase emits `AuthChangeEvent.signedOut` (covers both explicit sign-outs and refresh-token failures). Router's `refreshListenable` picks up the transition and redirects to `/login`.
 - Doc drift resolved (2026-04-24): empty / loading / error states were already implemented across all 18 async surfaces via `AsyncContent` + `EmptyState` + `ErrorState` primitives; tracker just hadn't been ticked. `HANDOFF.md` is now a local-only working note (gitignored).
+- Submission polish pass (2026-04-24): added `friendlyErrorMessage` helper (Supabase Auth / Postgrest / Storage / Socket cases), swapped profile screen's inline error Text for a snackbar, added `CourseShellSkeleton` so the professor + student course shells don't flash raw loaders. Optimistic roadmap updates: both roadmap tabs are now `ConsumerStatefulWidget` with a local override map; tapping a status picker updates the UI instantly, fires the Supabase write in the background, and reverts + snackbars on failure. Removes the skeleton flash that was happening on every coverage/progress toggle.
+- Stretch goals landed (2026-04-24):
+  - **Realtime announcements**: `sectionAnnouncementsProvider` is now a `StreamProvider` subscribed to `postgres_changes` on `announcements` for the current section. New posts / edits / deletes update the list without pull-to-refresh. `schema.sql` now adds `public.announcements` to the `supabase_realtime` publication.
+  - **Local notifications**: `flutter_local_notifications` fires a notification for new announcements via a global `announcementNotificationListenerProvider` mounted from `_AuthAwareSideEffects`. Skips self-posts, stale backfill (> 30s old), and the admin role.
+  - **Animated transitions**: Hero on the announcement campaign icon (card → detail), staggered fade+slide entrance (`FadeSlideIn`) on course lists and announcement lists. Existing Cupertino page transitions preserved.
+  - **Biometric auth**: `local_auth` + `shared_preferences`. After first sign-in, one-time dialog offers Face ID / fingerprint enrollment. Enrolled users see the `UnlockScreen` on next launch and must biometric-unlock before the router forwards them to the role home. Profile screen has a toggle. Android uses `FlutterFragmentActivity`; iOS has `NSFaceIDUsageDescription`.
+  - **Lecture insights (Gemini)**: `google_generative_ai` + new `lectureInsightProvider` (cached per-item via `ref.keepAlive()`). "Insights" button on file/lecture roadmap items opens a sheet that downloads the file from `course-content/{sectionId}/...`, sends it to `gemini-2.0-flash` with a JSON response schema, and renders summary + key topics. Graceful fallback to metadata + pre-extracted topics when `GEMINI_API_KEY` is not set.
 
 ## Active Decisions
 
@@ -134,9 +141,19 @@
 - [x] Loading skeletons (`LoadingSkeleton` + `AsyncContent` on every async surface).
 - [x] Friendly error states (`ErrorState` with retry on every async surface).
 - [x] Pull-to-refresh on key lists (admin home + detail screens; student/professor course lists).
-- [ ] Optimistic updates where appropriate.
+- [x] Optimistic updates on roadmap status pickers (no more skeleton flash on toggle; reverts + snackbars on error).
+- [x] Humanized auth/storage/postgrest error messages via `core/errors/friendly_error.dart` (login notice + profile snackbar).
+- [x] Course shell skeleton (`CourseShellSkeleton`) used while `CourseSection` metadata loads so the app bar + tab bar don't pop in.
 - [ ] Accessibility labels for controls.
 - [ ] Performance pass on large lists.
+
+### Stretch Goals
+
+- [x] Realtime announcements (Supabase Realtime on `announcements`).
+- [x] Local notifications on new announcements (`flutter_local_notifications`).
+- [x] Animated transitions (Hero on announcement icon; staggered list entrance).
+- [x] Biometric auth for returning users (`local_auth` + `UnlockScreen`).
+- [x] Lecture insights via Gemini (`google_generative_ai`, cached per-item, fallback to metadata when `GEMINI_API_KEY` is unset).
 
 ### Submission
 

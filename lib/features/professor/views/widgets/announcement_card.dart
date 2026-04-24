@@ -34,10 +34,14 @@ class AnnouncementCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.campaign_outlined,
-                color: colors.primary,
-                size: 16,
+              Hero(
+                tag: 'announcement-icon-${announcement.id}',
+                flightShuttleBuilder: _iconShuttle,
+                child: Icon(
+                  Icons.campaign_outlined,
+                  color: colors.primary,
+                  size: 16,
+                ),
               ),
               const SizedBox(width: Spacing.xs),
               Text(
@@ -86,4 +90,27 @@ class AnnouncementCard extends StatelessWidget {
     }
     return DateFormat('MMM d, y \u00b7 h:mm a').format(local);
   }
+}
+
+// Hero flight that renders the icon in its current Theme at both ends —
+// otherwise the default Flutter shuttle can look washed out when the accent
+// primary color differs between source and destination themes.
+Widget _iconShuttle(
+  BuildContext flightContext,
+  Animation<double> animation,
+  HeroFlightDirection flightDirection,
+  BuildContext fromHeroContext,
+  BuildContext toHeroContext,
+) {
+  final isForward = flightDirection == HeroFlightDirection.push;
+  final fromHero = fromHeroContext.widget as Hero;
+  final toHero = toHeroContext.widget as Hero;
+  return AnimatedBuilder(
+    animation: animation,
+    builder: (context, _) {
+      return isForward
+          ? (animation.value < 0.5 ? fromHero.child : toHero.child)
+          : (animation.value < 0.5 ? toHero.child : fromHero.child);
+    },
+  );
 }

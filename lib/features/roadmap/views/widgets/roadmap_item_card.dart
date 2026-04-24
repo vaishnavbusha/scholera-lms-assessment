@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/tokens.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../core/widgets/topic_chip.dart';
+import '../../../lecture_insights/views/lecture_insight_sheet.dart';
+import '../../../modules/models/module_item_type.dart';
 import '../../models/roadmap_item.dart';
 import 'roadmap_status_picker.dart';
 
@@ -69,6 +71,19 @@ class RoadmapItemCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (_hasInsights(item))
+                TextButton.icon(
+                  onPressed: () => LectureInsightSheet.show(context, item),
+                  icon: const Icon(Icons.auto_awesome_outlined, size: 16),
+                  label: const Text('Insights'),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.sm,
+                      vertical: 4,
+                    ),
+                  ),
+                ),
             ],
           ),
           if (item.topics.isNotEmpty) ...[
@@ -113,6 +128,14 @@ class RoadmapItemCard extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _hasInsights(RoadmapItem item) {
+  if (item.type != ModuleItemType.file && item.type != ModuleItemType.lecture) {
+    return false;
+  }
+  final path = item.storagePath;
+  return path != null && path.isNotEmpty;
 }
 
 class _StatusRow extends StatelessWidget {

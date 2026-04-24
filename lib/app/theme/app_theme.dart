@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'page_transitions.dart';
 import 'palette.dart';
 import 'role_theme.dart';
 import 'tokens.dart';
@@ -21,14 +22,13 @@ ThemeData buildAppTheme(RoleTheme role) {
     textTheme: textTheme,
     primaryTextTheme: textTheme,
     splashFactory: InkSparkle.splashFactory,
-    // Android's default ZoomPageTransitionsBuilder feels heavy when the
-    // destination screen renders a loading skeleton mid-animation. Using
-    // Cupertino's horizontal slide gives a calmer transition on both
-    // platforms without importing Cupertino widgets elsewhere.
+    // Shared-axis-style push: incoming screen slides + scales + fades from
+    // the right while the outgoing screen drifts left with parallax. See
+    // `ScholeraPageTransitionsBuilder` for the full choreography.
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.android: ScholeraPageTransitionsBuilder(),
+        TargetPlatform.iOS: ScholeraPageTransitionsBuilder(),
       },
     ),
     appBarTheme: AppBarTheme(
